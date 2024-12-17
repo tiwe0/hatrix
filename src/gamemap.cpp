@@ -2,6 +2,7 @@
 #include "hatrix/world.hpp"
 #include "hatrix/entities/entity.hpp"
 #include "hatrix/utils/position.hpp"
+#include "hatrix/utils/shadowcasting.hpp"
 
 Gamemap::Gamemap(World *world) : world(world) {};
 
@@ -19,6 +20,7 @@ void Gamemap::add_entity(Entity *entity, int x, int y)
     Position position{x, y};
 
     entities_vec.push_back(entity);
+    entity_ids_to_entity.insert(std::pair<std::string, Entity*>(entity->id, entity));
     entities_to_position.insert(std::pair<std::string, Position>(entity->id, position));
 
     position_to_entities[position].push_back(entity->id);
@@ -26,6 +28,7 @@ void Gamemap::add_entity(Entity *entity, int x, int y)
 
 void Gamemap::remove_entity(Entity *entity) {
     Position position = entities_to_position.at(entity->id);
+    entity_ids_to_entity.erase(entity->id);
     entities_to_position.erase(entity->id);
 
     auto it = std::find(position_to_entities[position].begin(), position_to_entities[position].end(), entity->id);
@@ -61,4 +64,34 @@ Position Gamemap::get_entity_position(std::string entity_id){
 
 const std::vector<Entity *> &Gamemap::enumerate_entities(){
     return entities_vec;
+};
+
+bool Gamemap::is_opaque(int x, int y) {
+    for(Entity* entity: enumerate_entities_at(x, y)){
+        if(entity->opaque){
+            return true;
+        };
+    };
+    return false;
+};
+
+void Gamemap::update_fov() {
+    visible_position.clear();
+    Entity * player = world->get_player();
+    Position p = world->get_entity_position(player->id);
+    int distance = 7;
+    utils_compute_fov(
+            std::pair(p.x, p.y),
+            [this](int _x, int _y){return is_opaque(_x, _y);},
+            [this](int _x, int _y){visible_position.push_back(Position{_x, _y});},
+            (float) distance
+    );
+};
+
+const std::vector<Entity *> Gamemap::enumerate_entities_at(int x, int y){
+    std::vector<Entity*> entities;
+    for(std::string id : position_to_entities[Position{x, y}]){
+        entities.push_back(entity_ids_to_entity[id]);
+    };
+    return entities;
 };
