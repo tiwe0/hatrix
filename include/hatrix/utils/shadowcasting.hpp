@@ -92,9 +92,6 @@ void scan_iterative(const Row& row, const std::pair<int, int>& origin,
     while (!rows.empty()) {
         Row current_row = rows.back();  // Equivalent to row = rows.pop()
         rows.pop_back();  // Remove the last element
-        if(current_row.depth > max_distance){
-            break;
-        }
 
         std::pair<int, int> prev_tile = {-1, -1};  // Initialize with an invalid tile
         for (const auto& tile : tiles(current_row, max_distance)) {
@@ -115,7 +112,7 @@ void scan_iterative(const Row& row, const std::pair<int, int>& origin,
             prev_tile = tile;
         }
 
-        if (is_floor(prev_tile.first, prev_tile.second)) {
+        if (current_row.depth <= max_distance && is_floor(prev_tile.first, prev_tile.second)) {
             rows.push_back(next_row(current_row));  // Add the next row if last tile was floor
         }
     }
