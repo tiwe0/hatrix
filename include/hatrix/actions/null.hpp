@@ -5,6 +5,7 @@
 class ActionNull: public Action{
     public:
         float perform(Entity *entity) override;
+        operator std::string() const override;
 };
 
 #endif

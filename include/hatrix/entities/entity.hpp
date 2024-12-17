@@ -1,15 +1,10 @@
 #ifndef HATRIX_ENTITY
 #define HATRIX_ENTITY
-
 #include <string>
-#include "hatrix/actions/action.hpp"
-#include "hatrix/world.hpp"
-#include "hatrix/utils/timer.hpp"
-#include "hatrix/controller.hpp"
 
+class Controller;
 class World;
 class Action;
-class Controller;
 
 enum EntityType
 {
@@ -41,8 +36,6 @@ class Entity
 
         void set_controller(Controller *controller);
         Controller *get_controller();
-
-        static Entity load_from_xml(const std::string &file_path);
 
     private:
         Controller *controller = nullptr;

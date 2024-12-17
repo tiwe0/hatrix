@@ -1,11 +1,62 @@
+#include <thread>
+#include <chrono>
+#include <iomanip>
 #include "hatrix/world.hpp"
+#include "hatrix/entities/entity.hpp"
+#include "hatrix/core/the_core.hpp"
+#include "hatrix/controller.hpp"
+#include "hatrix/renderer.hpp"
+#include "hatrix/updater.hpp"
 
-World::World() : should_quit(false) {};
+
+World::World() : should_quit(false)
+{
+    controller = new Controller();
+    renderer = new Renderer(this, controller);
+    core = new TheCore(this);
+    updater = new Updater(this, 1.0);
+};
+
+void World::render()
+{
+    renderer->render();
+};
+
+void World::update()
+{
+    updater->update();
+}
+
+int World::run()
+{
+    std::thread thread_render([this] { render(); });
+    std::thread thread_update([this] { update(); });
+
+    thread_render.join();
+    thread_update.join();
+
+    renderer->~Renderer();
+    core->~TheCore();
+
+    return 0;
+};
 
 World::~World() {
     for(Entity* entity: enumerate_entities()){
         entity->~Entity();
     }
+};
+
+std::string World::get_time() {
+    std::time_t timestamp = updater->get_ticks();
+
+    // 转换为 tm 结构
+    std::tm* timeInfo = std::localtime(&timestamp);
+
+    // 格式化日期时间
+    std::ostringstream oss;
+    oss << std::put_time(timeInfo, "%Y-%m-%d %H:%M:%S");
+    return oss.str();
 };
 
 void World::add_entity(Entity *entity, int x, int y)
@@ -57,4 +108,19 @@ Position World::get_entity_position(std::string entity_id){
 
 const std::vector<Entity *> &World::enumerate_entities(){
     return entities_vec;
+};
+
+Entity *World::get_player()
+{
+    return controller->get_player();
+};
+
+Action* World::get_action()
+{
+    return controller->get_action();
+};
+
+void World::set_player(Entity *player)
+{
+    controller->set_player(player);
 };

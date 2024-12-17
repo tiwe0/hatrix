@@ -1,8 +1,13 @@
 #include "hatrix/updater.hpp"
+#include "hatrix/world.hpp"
+#include "hatrix/entities/entity.hpp"
+#include "hatrix/utils/timer.hpp"
+#include "hatrix/controller.hpp"
+#include "hatrix/actions/action.hpp"
 
-Updater::Updater(float fps) : fps(fps) {};
+Updater::Updater(World *world, float fps) : world(world), fps(fps) {};
 
-void Updater::update(World *world)
+void Updater::update()
 {
     last_time = get_current_time();
 
@@ -10,15 +15,21 @@ void Updater::update(World *world)
     {
         if (should_update())
         {
-            doupdate(world);
+            doupdate();
         }
     }
 };
+
+time_t Updater::get_ticks()
+{
+    return ticks + BASETIME;
+}
 
 bool Updater::should_update()
 {
     if (fps <= 0.0)
     {
+        ticks += base_tick;
         return true;
     }
     float current_time = get_current_time();
@@ -27,13 +38,15 @@ bool Updater::should_update()
 
     if (dead_time >= 1.0 / fps)
     {
-        dead_time = 0;
+        dead_time = 0.0;
+        ticks += base_tick;
         return true;
     }
+
     return false;
 };
 
-void Updater::doupdate(World *world)
+void Updater::doupdate()
 {
     for (Entity *entity : world->enumerate_entities())
     {

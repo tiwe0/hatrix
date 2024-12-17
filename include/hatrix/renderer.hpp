@@ -8,9 +8,11 @@
 #include <chrono> // 用于获取时间
 #include <sys/ioctl.h> // 获取终端大小
 #include <unistd.h>
-#include "hatrix/world.hpp"
-#include "hatrix/controller.hpp"
-#include "hatrix/utils/timer.hpp"
+#include <panel.h>
+
+class World;
+class Controller;
+class Entity;
 
 class Renderer
 {
@@ -29,15 +31,51 @@ private:
     void handle_input();
     void handle_mouse_input();
     void handle_keyboard_input(int c);
+    void handle_code_mode_input(int c);
+    void handle_play_mode_input(int c);
 
     void dorender();
 
     void render_world();
+    void render_ground();
     void render_entity(Entity *entity);
+
     void render_ui();
+    void render_status_panel();
+    void render_inventory_panel();
+    void render_code_panel();
+
+    void code_mode_on();
+    void code_mode_off();
 
     World *world;
     Controller *controller;
+
+    WINDOW *windows[3];
+    PANEL *panels[3];
+
+    // 渲染器状态
+    bool show_inventory = false;
+    bool show_code = false;
+    bool code_mode = false;
+
+    // render target
+    int target_x = 0;
+    int target_y = 0;
+
+    // render offset
+    int offset_x = 0;
+    int offset_y = 0;
+
+    bool in_viewver(int y, int x);
+
+    int compute_render_x(int x);
+    int compute_render_y(int y);
+
+    // Code Editor
+    char buffer[87 * 24];
+    int code_x = 0;
+    int code_y = 0;
 
     float fps;
     float last_time;
@@ -53,5 +91,8 @@ private:
     int window_height;
 
     int last_key;
+
+    const int code_width = 87;
+    const int code_height = 26;
 };
 #endif
