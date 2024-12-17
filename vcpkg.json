@@ -1,5 +1,7 @@
 {
   "dependencies": [
-    "ncurses"
+    "lua",
+    "ncurses",
+    "luabridge3"
   ]
 }

@@ -1,4 +1,9 @@
+#include <string>
 #include "hatrix/entities/entity.hpp"
+#include "hatrix/utils/timer.hpp"
+#include "hatrix/actions/action.hpp"
+#include "hatrix/world.hpp"
+
 
 Entity::Entity() : glyph('@')
 {
@@ -14,7 +19,7 @@ void Entity::elapse(float time) {
     busy_time -= time;
     if (busy_time <= 0.0) {
         busy_time = 0.0;
-    }
+    };
 };
 
 bool Entity::is_busy() {
@@ -38,7 +43,7 @@ Controller *Entity::get_controller()
 void Entity::set_controller(Controller * the_controller)
 {
     controller = the_controller;
-}
+};
 
 int Entity::get_x() {
     return world->get_entity_position(id).x;
