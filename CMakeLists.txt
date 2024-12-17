@@ -13,6 +13,7 @@ set(
     src/updater.cpp
     src/world.cpp
     src/controller.cpp
+    src/gamemap.cpp
 
     src/actions/action.cpp
     src/actions/null.cpp

@@ -15,6 +15,7 @@ class Player: public Entity {
         int hunger = 100;
         int max_hunger = 100;
         int money = 0;
+        int vision = 10;
 
         Action *current_action = nullptr;
 };

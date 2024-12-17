@@ -12,18 +12,8 @@ class Entity;
 class Controller;
 class Renderer;
 class Updater;
-
-struct Position
-{
-    int x, y;
-
-    bool operator<(const Position& other) const {
-        if (x == other.x) {
-            return y < other.y; // 若 x 相等，按 y 排序
-        }
-        return x < other.x; // 按 x 排序
-    }
-};
+class Gamemap;
+struct Position;
 
 class World
 {
@@ -34,19 +24,19 @@ class World
         bool should_quit;
         bool core_connected = false;
 
-        const std::vector<Entity *> &enumerate_entities();
-
-        Position get_entity_position(std::string entity_id);
-
         void render();
         void update();
         int run();
 
-        // api;
+        // gammap api;
         void add_entity(Entity *entity, int x, int y);
         void remove_entity(Entity *entity);
         void move_entity(Entity *entity, int dx, int dy);
+        const std::vector<Entity *> &enumerate_entities();
+        Position get_entity_position(std::string entity_id);
 
+
+        // controller api
         Entity *get_player();
         void set_player(Entity *player);
 
@@ -60,6 +50,7 @@ class World
     private:
         Controller *controller;
         Renderer *renderer;
+        Gamemap *gamemap;
 
         float stability = 1.0;
 
