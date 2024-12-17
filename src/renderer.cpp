@@ -5,9 +5,11 @@
 #include "hatrix/core/the_core.hpp"
 #include "hatrix/controller.hpp"
 #include "hatrix/utils/timer.hpp"
+#include "hatrix/utils/position.hpp"
 #include "hatrix/updater.hpp"
 #include "hatrix/actions/move.hpp"
 #include "hatrix/actions/action.hpp"
+#include "hatrix/gamemap.hpp"
 
 // stdscr: 36 , 130 , 0, 0
 // status: 3, 130, 33, 0
@@ -284,11 +286,12 @@ void Renderer::render_ground() {
 
 void Renderer::render_world()
 {
-    render_ground();
-    for (Entity *entity : world->enumerate_entities())
-    {
-        render_entity(entity);
-    }
+    for (Position p : world->gamemap->visiable_positions){
+        mvaddch(p.y, p.x, '.');
+        for (Entity *entity : world->gamemap->enumerate_entities_at(p.x, p.y)){
+            render_entity(entity);
+        };
+    };
 };
 
 bool Renderer::in_viewver(int y, int x) {

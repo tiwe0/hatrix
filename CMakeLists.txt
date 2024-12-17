@@ -31,19 +31,20 @@ set(
 
 add_executable(main ${SOURCES})
 
-set(CURSES_NEED_NCURSES TRUE)
-find_package(Curses REQUIRED)
-
 target_include_directories(main PRIVATE include)
 
 find_package(Lua REQUIRED)
 target_include_directories(main PRIVATE ${LUA_INCLUDE_DIR})
 target_link_libraries(main PRIVATE ${LUA_LIBRARIES})
 
-target_include_directories(main PRIVATE vcpkg_installed/arm64-osx/include)
+target_include_directories(main PRIVATE ${LUABRIDGE3_INCLUDE_DIRS})
 
+target_include_directories(main PRIVATE "./vcpkg_installed/arm64-osx/include")
+
+set(CURSES_NEED_NCURSES TRUE)
+find_package(Curses REQUIRED)
 target_include_directories(main PRIVATE ${CURSES_INCLUDE_DIRS})
 target_compile_options(main PRIVATE ${CURSES_CFLAGS})
-target_link_libraries(main PRIVATE ${CURSES_LIBRARIES})
+target_link_libraries(main PRIVATE ncurses)
 target_link_libraries(main PRIVATE panel)
 

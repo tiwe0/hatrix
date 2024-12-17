@@ -46,11 +46,11 @@ class World
 
         TheCore *core;
         Updater *updater;
+        Gamemap *gamemap;
 
     private:
         Controller *controller;
         Renderer *renderer;
-        Gamemap *gamemap;
 
         float stability = 1.0;
 

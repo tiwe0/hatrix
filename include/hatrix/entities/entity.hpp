@@ -37,11 +37,12 @@ class Entity
         void set_controller(Controller *controller);
         Controller *get_controller();
 
-    private:
-        Controller *controller = nullptr;
         EntityType type;
         bool blocking;
         bool opaque;
+
+    private:
+        Controller *controller = nullptr;
         float busy_time = 0;
 };
 #endif
