@@ -4,6 +4,8 @@
 
 Wall::Wall(){
     glyph = '#';
+    opaque = true;
+    blocking = true;
 };
 
 Wall::~Wall() {};

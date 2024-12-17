@@ -4,6 +4,7 @@
 #include "hatrix/utils/timer.hpp"
 #include "hatrix/controller.hpp"
 #include "hatrix/actions/action.hpp"
+#include "hatrix/gamemap.hpp"
 
 Updater::Updater(World *world, float fps) : world(world), fps(fps) {};
 
@@ -48,6 +49,9 @@ bool Updater::should_update()
 
 void Updater::doupdate()
 {
+    if(world->get_player()!= nullptr){
+        world->gamemap->update_fov();
+    }
     for (Entity *entity : world->enumerate_entities())
     {
         update_entity(entity);

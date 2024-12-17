@@ -8,6 +8,8 @@
 #include "hatrix/updater.hpp"
 #include "hatrix/actions/move.hpp"
 #include "hatrix/actions/action.hpp"
+#include "hatrix/gamemap.hpp"
+#include "hatrix/utils/position.hpp"
 
 // stdscr: 36 , 130 , 0, 0
 // status: 3, 130, 33, 0
@@ -275,20 +277,21 @@ void Renderer::dorender()
 };
 
 void Renderer::render_ground() {
-    for (int row = 0; row <= window_height; row ++){
-        for (int col = 0; col <= window_width; col ++){
-            mvaddch(row, col, '.');
-        };
+    for (Position p : world->gamemap->visible_position){
+        int rx = compute_render_x(p.x);
+        int ry = compute_render_y(p.y);
+        mvaddch(ry, rx, '.');
     };
 };
 
 void Renderer::render_world()
 {
     render_ground();
-    for (Entity *entity : world->enumerate_entities())
-    {
-        render_entity(entity);
-    }
+    for (Position p: world->gamemap->visible_position){
+        for (Entity * entity : world->gamemap->enumerate_entities_at(p.x, p.y)){
+            render_entity(entity);
+        };
+    };
 };
 
 bool Renderer::in_viewver(int y, int x) {

@@ -29,6 +29,9 @@ class Entity
 
         char glyph;
         std::string id;
+        bool blocking;
+        bool opaque;
+
         World *world;
 
         int get_x();
@@ -40,8 +43,6 @@ class Entity
     private:
         Controller *controller = nullptr;
         EntityType type;
-        bool blocking;
-        bool opaque;
         float busy_time = 0;
 };
 #endif

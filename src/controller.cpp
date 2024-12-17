@@ -28,6 +28,7 @@ void Controller::set_controller(Entity * entity)
 void Controller::set_player(Entity *player)
 {
     player->set_controller(nullptr);
+    the_entity = player;
 };
 
 Entity *Controller::get_player()

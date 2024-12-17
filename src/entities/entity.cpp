@@ -3,6 +3,7 @@
 #include "hatrix/utils/timer.hpp"
 #include "hatrix/actions/action.hpp"
 #include "hatrix/world.hpp"
+#include "hatrix/utils/position.hpp"
 
 
 Entity::Entity() : glyph('@')
