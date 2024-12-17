@@ -1,4 +1,5 @@
 .vscode/
+vcpkg_install/
 build/
 CMakeFiles/
 cmake_install.cmake
