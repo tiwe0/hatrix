@@ -42,7 +42,7 @@ Entity* GamemapCell::pop_entity(Entity *entity) {
     return entity;
 };
 
-Gamemap::Gamemap(World *world) : world(world) {};
+Gamemap::Gamemap(World *world, int width, int height) : world(world), width(width), height(height) {};
 
 Gamemap::~Gamemap() {
     for (Entity *entity : enumerate_entities())
@@ -51,7 +51,18 @@ Gamemap::~Gamemap() {
     }
 };
 
+int inline positive_mod(int a, int b) {
+    return ((a % b) + b) % b;
+}
+
 GamemapCell *Gamemap::get_cell(int x, int y) {
+    if(width != -1 && width !=0){
+        x = positive_mod(x, width);
+    };
+    if (height != -1 && height != 0)
+    {
+        y = positive_mod(y, height);
+    };
     auto it = position_bucket.find(Position{x, y});
     GamemapCell *the_cell;
     if (it == position_bucket.end()){

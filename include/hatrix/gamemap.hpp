@@ -33,7 +33,7 @@ class GamemapCell {
 class Gamemap
 {
 public:
-    Gamemap(World *world);
+    Gamemap(World *world, int width=-1, int height=-1);
     ~Gamemap();
 
     // helper
@@ -65,6 +65,9 @@ public:
     void update_fov();
 
 private:
+    // -1 时表示无限大
+    int width, height;
+
     bool update_flag = false;
     World *world;
 
