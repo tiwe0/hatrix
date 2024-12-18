@@ -1,10 +1,12 @@
 #ifndef HATRIX_ENTITY
 #define HATRIX_ENTITY
 #include <string>
+#include "hatrix/utils/position.hpp"
 
 class Controller;
 class World;
 class Action;
+class Position;
 
 enum EntityType
 {
@@ -25,24 +27,18 @@ class Entity
 
         bool is_under_controll();
 
-        virtual Action *make_decision() = 0;
+        Action *make_decision();
+        Action *make_decision_as_player();
+        virtual Action *make_decision_as_npc() = 0;
 
         char glyph;
         std::string id;
         bool blocking;
         bool opaque;
-
-        World *world;
-
-        int get_x();
-        int get_y();
-
-        void set_controller(Controller *controller);
-        Controller *get_controller();
-
-    private:
-        Controller *controller = nullptr;
         EntityType type;
+        Position position;
+        World *world;
+        Controller *controller = nullptr;
         float busy_time = 0;
 };
 #endif

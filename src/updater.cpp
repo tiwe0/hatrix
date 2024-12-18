@@ -63,14 +63,7 @@ void Updater::update_entity(Entity *entity)
         return;
     }
 
-    Action *action;
-    // 由 Controller 做出decision;
-    if (entity->is_under_controll())
-    {
-        action = entity->get_controller()->make_decision();
-    } else {
-        action = entity->make_decision();
-    }
+    Action *action = entity->make_decision();
     float busy_time = action->perform(entity);
     entity->set_busy(busy_time);
     action->~Action();

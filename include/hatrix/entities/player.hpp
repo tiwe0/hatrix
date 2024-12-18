@@ -7,7 +7,7 @@ class Action;
 class Player: public Entity {
     public:
         Player();
-        Action *make_decision() override;
+        Action *make_decision_as_npc() override;
 
     private:
         int health = 100;

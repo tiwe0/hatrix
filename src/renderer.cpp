@@ -77,6 +77,11 @@ void Renderer::init()
     windows[2] = newwin(28, 89, 3, 30);
     panels[2] = new_panel(windows[2]);
     hide_panel(panels[2]);
+
+    // 新建 debug window
+    windows[3] = newwin(5, window_width, window_height - 5, 0);
+    panels[3] = new_panel(windows[3]);
+    hide_panel(panels[3]);
 };
 
 void Renderer::end()
@@ -142,6 +147,10 @@ void Renderer::handle_code_mode_input(int c)
         show_code = false;
         code_mode_off();
         hide_panel(panels[2]);
+        if(debug_mode){
+            debug_mode = false;
+            world->core_eval(buffer);
+        };
         break;
 
     // Del
@@ -218,7 +227,10 @@ void Renderer::handle_play_mode_input(int c)
         break;
 
     case 'o':
-        world->core->eval("world.core_connected = true");
+        show_code = true;
+        debug_mode = true;
+        code_mode_on();
+        show_panel(panels[2]);
         break;
 
     case 'p':
@@ -289,7 +301,13 @@ void Renderer::render_ground()
 
 void Renderer::render_world()
 {
+    Entity *player = world->get_player();
+    Position player_position = player->position;
+    target_x = player_position.x;
+    target_y = player_position.y;
+
     render_ground();
+
     for (Position p: world->gamemap->visible_position){
         for (Entity * entity : world->gamemap->enumerate_entities_at(p.x, p.y)){
             render_entity(entity);
@@ -318,9 +336,10 @@ int Renderer::compute_render_y(int y) {
 void Renderer::render_entity(Entity *entity)
 {
     char glyph = entity->glyph;
-    int x = entity->get_x();
-    int y = entity->get_y();
-    if(in_viewver(y, x)){
+    int x = entity->position.x;
+    int y = entity->position.y;
+    if (in_viewver(y, x))
+    {
         int rx = compute_render_x(x);
         int ry = compute_render_y(y);
         mvaddch(ry, rx, glyph);
@@ -343,6 +362,11 @@ void Renderer::render_inventory_panel()
     box(windows[1], 0, 0);
     mvwprintw(windows[1], 0, 7, "Inventory");
 };
+
+void Renderer::render_debug_panel()
+{
+    ;
+}
 
 static int render_row, render_col;
 
@@ -409,21 +433,15 @@ void Renderer::render_ui()
     box(stdscr, 0, 0);
 
     mvprintw(0, 0, "(%d, %d)", target_x, target_y);
-    mvprintw(window_height - 5, 1, std::string(*world->get_action()).c_str());
 
     render_status_panel();
     render_inventory_panel();
     render_code_panel();
+    render_debug_panel();
 
     mvprintw(window_height - 6, 1, "Window size (%d, %d)", window_width, window_height);
-    if (world->core_connected)
-    {
-        mvprintw(window_height - 4, 1, "connected");
-    }
-    else
-    {
-        mvprintw(window_height - 4, 1, "disconnected");
-    };
+    mvprintw(window_height - 5, 1, "last error: (%s)", world->core->last_eval_error.c_str());
+    mvprintw(window_height - 4, 1, world->message.c_str());
 };
 
 void Renderer::code_mode_on()

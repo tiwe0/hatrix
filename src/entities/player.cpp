@@ -6,7 +6,7 @@ Player::Player() {
     glyph = '@';
 };
 
-Action *Player::make_decision()
+Action *Player::make_decision_as_npc()
 {
     if (current_action != nullptr)
     {

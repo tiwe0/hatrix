@@ -15,22 +15,12 @@ Action* Controller::make_decision(){
     };
 };
 
-void Controller::set_controller(Entity * entity)
-{
-    if(the_entity!=nullptr)
-    {
-        the_entity->set_controller(nullptr);
-    };
-    the_entity = entity;
-    the_entity->set_controller(this);
-};
-
 void Controller::set_player(Entity *player)
 {
     if(the_entity != nullptr){
-        the_entity->set_controller(nullptr);
+        the_entity->controller = nullptr;
     }
-    player->set_controller(this);
+    player->controller = this;
     the_entity = player;
 };
 

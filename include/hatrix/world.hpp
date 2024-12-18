@@ -2,6 +2,7 @@
 #ifndef HATRIX_WORLD
 #define HATRIX_WORLD
 #include <vector>
+#include <list>
 #include <string>
 #include <map>
 #include <algorithm>
@@ -32,17 +33,23 @@ class World
         void add_entity(Entity *entity, int x, int y);
         void remove_entity(Entity *entity);
         void move_entity(Entity *entity, int dx, int dy);
-        const std::vector<Entity *> &enumerate_entities();
-        Position get_entity_position(std::string entity_id);
-
+        const std::list<Entity *> &enumerate_entities();
 
         // controller api
         Entity *get_player();
         void set_player(Entity *player);
 
+        // core api
+        void core_eval(const char *cmd);
+
+        // world api
+        void print(const std::string message);
+
         Action *get_action();
 
         std::string get_time();
+
+        std::string message;
 
         TheCore *core;
         Updater *updater;
@@ -53,9 +60,5 @@ class World
         Renderer *renderer;
 
         float stability = 1.0;
-
-        std::vector<Entity *> entities_vec;
-        std::map<std::string, Position> entities_to_position;
-        std::map<Position, std::vector<std::string>> position_to_entities;
 };
 #endif

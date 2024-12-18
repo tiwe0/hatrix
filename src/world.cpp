@@ -1,6 +1,7 @@
 #include <thread>
 #include <chrono>
 #include <iomanip>
+#include <list>
 #include "hatrix/world.hpp"
 #include "hatrix/entities/entity.hpp"
 #include "hatrix/core/the_core.hpp"
@@ -62,7 +63,9 @@ std::string World::get_time() {
 
 void World::add_entity(Entity *entity, int x, int y)
 {
-    gamemap->add_entity(entity, x, y);
+    entity->position.x = x;
+    entity->position.y = y;
+    gamemap->add_entity(entity);
 };
 
 void World::remove_entity(Entity *entity) {
@@ -73,11 +76,7 @@ void World::move_entity(Entity *entity, int dx, int dy) {
     gamemap->move_entity(entity, dx, dy);
 };
 
-Position World::get_entity_position(std::string entity_id){
-    return gamemap->get_entity_position(entity_id);
-};
-
-const std::vector<Entity *> &World::enumerate_entities(){
+const std::list<Entity *> &World::enumerate_entities(){
     return gamemap->enumerate_entities();
 };
 
@@ -94,4 +93,12 @@ Action* World::get_action()
 void World::set_player(Entity *player)
 {
     controller->set_player(player);
+};
+
+void World::core_eval(const char* cmd){
+    core->eval(cmd);
+};
+
+void World::print(const std::string _message){
+    message = _message;
 };

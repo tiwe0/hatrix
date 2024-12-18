@@ -8,7 +8,7 @@ class Wall : public Entity
 public:
     Wall();
     ~Wall() override;
-    Action *make_decision() override;
+    Action *make_decision_as_npc() override;
 
 private:
 

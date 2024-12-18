@@ -44,6 +44,7 @@ private:
     void render_status_panel();
     void render_inventory_panel();
     void render_code_panel();
+    void render_debug_panel();
 
     void code_mode_on();
     void code_mode_off();
@@ -51,13 +52,14 @@ private:
     World *world;
     Controller *controller;
 
-    WINDOW *windows[3];
-    PANEL *panels[3];
+    WINDOW *windows[4];
+    PANEL *panels[4];
 
     // 渲染器状态
     bool show_inventory = false;
     bool show_code = false;
     bool code_mode = false;
+    bool debug_mode = false;
 
     // render target
     int target_x = 0;
@@ -74,6 +76,10 @@ private:
 
     // Code Editor
     char buffer[87 * 24];
+
+    // Debug Editor
+    char debug_buffer[1024 * 5];
+
     int code_x = 0;
     int code_y = 0;
 

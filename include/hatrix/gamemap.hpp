@@ -4,45 +4,74 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <list>
+#include <algorithm>
+#include "hatrix/utils/position.hpp"
 
 class World;
 class Entity;
 struct Position;
 
-class Gamemap{
+class GamemapCell {
     public:
-        Gamemap(World* world);
-        ~Gamemap();
+        GamemapCell(int x, int y);
+        ~GamemapCell();
 
-        void add_entity(Entity *entity, int x, int y);
-        void remove_entity(Entity *entity);
-        void move_entity(Entity *entity, int dx, int dy);
+        bool blocking;
+        bool opaque;
+        Position position;
+        std::list<Entity *> entities;
 
-        const std::vector<Entity *> &enumerate_entities();
-        const std::vector<Entity *> enumerate_entities_at(int x, int y);
+        void update_blocking();
+        void update_opaque();
 
-        bool is_opaque(int x, int y);
+        void add_entity(Entity *entity);
+        void del_entity(Entity *entity);
+        Entity* pop_entity(Entity *entity);
+};
 
-        Position get_entity_position(std::string entity_id);
+class Gamemap
+{
+public:
+    Gamemap(World *world);
+    ~Gamemap();
 
-        const std::vector<Position> compute_fov(int x, int y, int distance);
-        void mark_as_visible(int x, int y);
+    // helper
+    GamemapCell *get_cell(int x, int y);
 
-        std::vector<Position> visible_position;
+    // entity api
+    // 增
+    void add_entity(Entity *entity);
+    // 删
+    void remove_entity(Entity *entity);
+    // 改
+    void move_entity(Entity *entity, int dx, int dy);
 
-        bool should_update_fov;
-        bool should_render_fov;
-        void doupdate_fov();
-        void update_fov();
+    // 查
+    // 查询 所有 entity
+    const std::list<Entity *> &enumerate_entities();
+    // 查询某一位置所有 entity
+    const std::list<Entity *> &enumerate_entities_at(int x, int y);
 
-    private:
-        bool update_flag = false;
-        World *world;
+    // map cell api
+    bool is_opaque(int x, int y);
+    bool is_blocking(int x, int y);
 
-        std::vector<Entity *> entities_vec;
-        std::map<std::string, Entity*> entity_ids_to_entity;
-        std::map<std::string, Position> entities_to_position;
-        std::map<Position, std::vector<std::string>> position_to_entities;
+    std::vector<Position> visible_position;
+
+    bool should_update_fov;
+    bool should_render_fov;
+    void doupdate_fov();
+    void update_fov();
+
+private:
+    bool update_flag = false;
+    World *world;
+
+    std::list<Entity *> static_entities;
+    std::list<Entity *> normal_entities;
+
+    std::map<Position, GamemapCell *> position_bucket;
 };
 
 #endif

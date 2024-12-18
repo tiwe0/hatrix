@@ -1,5 +1,6 @@
 #include <string>
 #include "hatrix/entities/entity.hpp"
+#include "hatrix/controller.hpp"
 #include "hatrix/utils/timer.hpp"
 #include "hatrix/actions/action.hpp"
 #include "hatrix/world.hpp"
@@ -36,20 +37,13 @@ bool Entity::is_under_controll() {
     return controller != nullptr;
 };
 
-Controller *Entity::get_controller()
-{
-    return controller;
-};
+Action* Entity::make_decision(){
+    if(is_under_controll()){
+        return make_decision_as_player();
+    };
+    return make_decision_as_npc();
+}
 
-void Entity::set_controller(Controller * the_controller)
-{
-    controller = the_controller;
-};
-
-int Entity::get_x() {
-    return world->get_entity_position(id).x;
-};
-
-int Entity::get_y() {
-    return world->get_entity_position(id).y;
-};
+Action* Entity::make_decision_as_player(){
+    return controller->make_decision();
+}
