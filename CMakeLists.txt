@@ -19,12 +19,15 @@ set(
     src/actions/null.cpp
     src/actions/idle.cpp
     src/actions/move.cpp
+    src/actions/open.cpp
+    src/actions/close.cpp
 
     src/core/the_core.cpp
 
     src/entities/entity.cpp
     src/entities/wall.cpp
     src/entities/player.cpp
+    src/entities/door.cpp
 
     src/utils/timer.cpp
 )

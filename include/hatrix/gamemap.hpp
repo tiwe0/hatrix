@@ -10,7 +10,7 @@
 
 class World;
 class Entity;
-struct Position;
+struct Vec2;
 
 class GamemapCell {
     public:
@@ -19,7 +19,7 @@ class GamemapCell {
 
         bool blocking;
         bool opaque;
-        Position position;
+        Vec2 position;
         std::list<Entity *> entities;
 
         void update_blocking();
@@ -33,7 +33,7 @@ class GamemapCell {
 class Gamemap
 {
 public:
-    Gamemap(World *world);
+    Gamemap(World *world, int width=-1, int height=-1);
     ~Gamemap();
 
     // helper
@@ -52,12 +52,18 @@ public:
     const std::list<Entity *> &enumerate_entities();
     // 查询某一位置所有 entity
     const std::list<Entity *> &enumerate_entities_at(int x, int y);
+    // 查询某一位置 第一个 符合条件的 entity, 没有则返回 nullptr
+    Entity *get_first_entity_at_which(int x, int y, std::function<bool(Entity *)> cond);
 
     // map cell api
     bool is_opaque(int x, int y);
     bool is_blocking(int x, int y);
 
-    std::vector<Position> visible_position;
+    // door
+    bool open(int x, int y);
+    bool close(int x, int y);
+
+    std::vector<Vec2> visible_position;
 
     bool should_update_fov;
     bool should_render_fov;
@@ -65,13 +71,16 @@ public:
     void update_fov();
 
 private:
+    // -1 时表示无限大
+    int width, height;
+
     bool update_flag = false;
     World *world;
 
     std::list<Entity *> static_entities;
     std::list<Entity *> normal_entities;
 
-    std::map<Position, GamemapCell *> position_bucket;
+    std::map<Vec2, GamemapCell *> position_bucket;
 };
 
 #endif

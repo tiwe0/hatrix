@@ -1,8 +1,11 @@
+#include <typeinfo>
 #include "hatrix/gamemap.hpp"
 #include "hatrix/world.hpp"
 #include "hatrix/entities/entity.hpp"
 #include "hatrix/utils/position.hpp"
 #include "hatrix/utils/shadowcasting.hpp"
+#include "hatrix/entities/player.hpp"
+#include "hatrix/entities/door.hpp"
 
 GamemapCell::GamemapCell(int x, int y) : blocking(false), opaque(false) {
     position.x = x;
@@ -42,7 +45,7 @@ Entity* GamemapCell::pop_entity(Entity *entity) {
     return entity;
 };
 
-Gamemap::Gamemap(World *world) : world(world) {};
+Gamemap::Gamemap(World *world, int width, int height) : world(world), width(width), height(height) {};
 
 Gamemap::~Gamemap() {
     for (Entity *entity : enumerate_entities())
@@ -51,12 +54,23 @@ Gamemap::~Gamemap() {
     }
 };
 
+int inline positive_mod(int a, int b) {
+    return ((a % b) + b) % b;
+}
+
 GamemapCell *Gamemap::get_cell(int x, int y) {
-    auto it = position_bucket.find(Position{x, y});
+    if(width != -1 && width !=0){
+        x = positive_mod(x, width);
+    };
+    if (height != -1 && height != 0)
+    {
+        y = positive_mod(y, height);
+    };
+    auto it = position_bucket.find(Vec2{x, y});
     GamemapCell *the_cell;
     if (it == position_bucket.end()){
         the_cell = new GamemapCell(x, y);
-        position_bucket.insert(std::pair(Position{x, y}, the_cell));
+        position_bucket.insert(std::pair(Vec2{x, y}, the_cell));
     }
     else
     {
@@ -91,8 +105,10 @@ void Gamemap::remove_entity(Entity *entity) {
 };
 
 void Gamemap::move_entity(Entity *entity, int dx, int dy) {
-    Position old_position = entity->position;
-    Position new_position = Position{old_position.x + dx, old_position.y + dy};
+    entity->direction = Vec2{dx, dy};
+
+    Vec2 old_position = entity->position;
+    Vec2 new_position = Vec2{old_position.x + dx, old_position.y + dy};
 
     if(is_blocking(new_position.x, new_position.y)){
         return;
@@ -104,12 +120,49 @@ void Gamemap::move_entity(Entity *entity, int dx, int dy) {
     get_cell(new_position.x, new_position.y)->add_entity(entity);
 };
 
+bool Gamemap::open(int x, int y) {
+    Entity *the_entity = get_first_entity_at_which(x, y, [](Entity *entity)
+                                                         { return typeid(*entity) == typeid(Door); });
+    Door *the_door = (Door *)the_entity;
+    if (the_door == nullptr){
+        return false;
+    }else {
+        the_door->open();
+        get_cell(x, y)->update_blocking();
+        get_cell(x, y)->update_opaque();
+        return true;
+    }
+};
+
+bool Gamemap::close(int x, int y) {
+    Entity *the_entity = get_first_entity_at_which(x, y, [](Entity *entity)
+                                                         { return typeid(*entity) == typeid(Door); });
+    Door *the_door = (Door *)the_entity;
+    if (the_door == nullptr){
+        return false;
+    }else {
+        the_door->close();
+        get_cell(x, y)->update_blocking();
+        get_cell(x, y)->update_opaque();
+        return true;
+    }
+};
+
 const std::list<Entity *> &Gamemap::enumerate_entities() {
     return normal_entities;
 };
 
 const std::list<Entity *> &Gamemap::enumerate_entities_at(int x, int y) {
     return get_cell(x, y)->entities;
+};
+
+Entity *Gamemap::get_first_entity_at_which(int x, int y, std::function<bool(Entity *)> cond) {
+    for(Entity* entity: enumerate_entities_at(x, y)){
+        if(cond(entity)){
+            return entity;
+        };
+    };
+    return nullptr;
 };
 
 bool Gamemap::is_opaque(int x, int y) {
@@ -127,16 +180,12 @@ void Gamemap::update_fov() {
 void Gamemap::doupdate_fov(){
     visible_position.clear();
     Entity * player = world->get_player();
-    Position p = player->position;
-    int distance = 7;
+    Vec2 p = player->position;
+    int distance = ((Player*)player)->vision;
     utils_compute_fov(
             std::pair(p.x, p.y),
-            [this](int _x, int _y){
-                if(_x == INFINITY || _y == INFINITY){
-                    return true;
-                }
-                return is_opaque(_x, _y);},
-            [this](int _x, int _y){visible_position.push_back(Position{_x, _y});},
+            [this](int _x, int _y){return is_opaque(_x, _y);},
+            [this](int _x, int _y){visible_position.push_back(Vec2{_x, _y});},
             (float) distance
     );
 }

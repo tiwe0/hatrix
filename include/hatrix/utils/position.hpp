@@ -1,10 +1,10 @@
 #ifndef HATRIX_UTILS_POSTION
 #define HATRIX_UTILS_POSTION
-struct Position
+struct Vec2
 {
     int x, y;
 
-    bool operator<(const Position& other) const {
+    bool operator<(const Vec2& other) const {
         if (x == other.x) {
             return y < other.y; // 若 x 相等，按 y 排序
         }

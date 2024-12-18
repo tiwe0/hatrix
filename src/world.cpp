@@ -77,6 +77,14 @@ void World::move_entity(Entity *entity, int dx, int dy) {
     gamemap->move_entity(entity, dx, dy);
 };
 
+bool World::open(int x, int y){
+    return gamemap->open(x, y);
+};
+
+bool World::close(int x, int y){
+    return gamemap->close(x, y);
+}
+
 const std::list<Entity *> &World::enumerate_entities(){
     return gamemap->enumerate_entities();
 };
