@@ -93,7 +93,7 @@ void scan_iterative(const Row& row, const std::pair<int, int>& origin,
         Row current_row = rows.back();  // Equivalent to row = rows.pop()
         rows.pop_back();  // Remove the last element
 
-        std::pair<int, int> prev_tile = {-1, -1};  // Initialize with an invalid tile
+        std::pair<int, int> prev_tile = {INFINITY, INFINITY};  // Initialize with an invalid tile
         for (const auto& tile : tiles(current_row, max_distance)) {
             if (is_wall(tile.first, tile.second) || is_symmetric(current_row, tile)) {
                 reveal(tile.first, tile.second);

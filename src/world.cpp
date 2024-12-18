@@ -63,6 +63,7 @@ std::string World::get_time() {
 
 void World::add_entity(Entity *entity, int x, int y)
 {
+    entity->world = this;
     entity->position.x = x;
     entity->position.y = y;
     gamemap->add_entity(entity);

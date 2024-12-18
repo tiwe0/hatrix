@@ -131,7 +131,11 @@ void Gamemap::doupdate_fov(){
     int distance = 7;
     utils_compute_fov(
             std::pair(p.x, p.y),
-            [this](int _x, int _y){return is_opaque(_x, _y);},
+            [this](int _x, int _y){
+                if(_x == INFINITY || _y == INFINITY){
+                    return true;
+                }
+                return is_opaque(_x, _y);},
             [this](int _x, int _y){visible_position.push_back(Position{_x, _y});},
             (float) distance
     );
