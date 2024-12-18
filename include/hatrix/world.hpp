@@ -14,7 +14,7 @@ class Controller;
 class Renderer;
 class Updater;
 class Gamemap;
-struct Position;
+struct Vec2;
 
 class World
 {
@@ -33,6 +33,10 @@ class World
         void add_entity(Entity *entity, int x, int y);
         void remove_entity(Entity *entity);
         void move_entity(Entity *entity, int dx, int dy);
+
+        bool open(int x, int y);
+        bool close(int x, int y);
+
         const std::list<Entity *> &enumerate_entities();
 
         // controller api

@@ -123,26 +123,30 @@ void utils_compute_fov(std::pair<int, int> origin,
                  const std::function<bool(int, int)>& is_blocking,
                  const std::function<void(int, int)>& mark_visible,
                  float max_distance) {
+
     mark_visible(origin.first, origin.second);  // Mark the origin as visible
 
     for (int i = 0; i < 4; ++i) {
         Cardinal quadrant = static_cast<Cardinal>(i);
 
         // Reveal function
-        auto reveal = [&quadrant, &origin, &mark_visible](int x, int y) {
-            auto transformed = transform(quadrant, origin, std::make_pair(x, y));
+        auto reveal = [&quadrant, &origin, &mark_visible](int row, int col) {
+            auto transformed = transform(quadrant, origin, std::make_pair(row, col));
             mark_visible(transformed.first, transformed.second);
         };
 
         // Is wall function
-        auto is_wall = [&quadrant, &origin, &is_blocking](int x, int y) -> bool {
-            auto transformed = transform(quadrant, origin, std::make_pair(x, y));
+        auto is_wall = [&quadrant, &origin, &is_blocking](int row, int col) -> bool {
+            if (row == INFINITY || col == INFINITY){
+                return true;
+            };
+            auto transformed = transform(quadrant, origin, std::make_pair(row, col));
             return is_blocking(transformed.first, transformed.second);
         };
 
         // Is floor function
-        auto is_floor = [&quadrant, &origin, &is_blocking](int x, int y) -> bool {
-            auto transformed = transform(quadrant, origin, std::make_pair(x, y));
+        auto is_floor = [&quadrant, &origin, &is_blocking](int row, int col) -> bool {
+            auto transformed = transform(quadrant, origin, std::make_pair(row, col));
             return !is_blocking(transformed.first, transformed.second);
         };
 

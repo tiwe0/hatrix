@@ -6,7 +6,7 @@
 class Controller;
 class World;
 class Action;
-class Position;
+class Vec2;
 
 enum EntityType
 {
@@ -36,9 +36,11 @@ class Entity
         bool blocking;
         bool opaque;
         EntityType type;
-        Position position;
+        Vec2 position;
+        Vec2 direction{0, 0};
         World *world;
         Controller *controller = nullptr;
         float busy_time = 0;
+
 };
 #endif

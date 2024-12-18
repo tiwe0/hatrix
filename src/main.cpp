@@ -3,6 +3,7 @@
 #include "hatrix/world.hpp"
 #include "hatrix/entities/wall.hpp"
 #include "hatrix/entities/player.hpp"
+#include "hatrix/entities/door.hpp"
 
 int main()
 {
@@ -19,11 +20,11 @@ int main()
     world_ptr->add_entity(new Wall(), 2, 1);
     world_ptr->add_entity(new Wall(), 2, 2);
     world_ptr->add_entity(new Wall(), -1, -2);
-    world_ptr->add_entity(new Wall(), -1, -1);
     world_ptr->add_entity(new Wall(), 0, -2);
-    world_ptr->add_entity(new Wall(), 1, -2);
+    //world_ptr->add_entity(new Wall(), 1, -2);
     world_ptr->add_entity(new Wall(), -1, 2);
     world_ptr->add_entity(new Wall(), 0, 2);
+    world_ptr->add_entity(new Door(), 1, 2);
 
     Player *player = new Player();
     world_ptr->add_entity(player, 1, 1);

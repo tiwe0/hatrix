@@ -8,6 +8,8 @@
 #include "hatrix/updater.hpp"
 #include "hatrix/actions/move.hpp"
 #include "hatrix/actions/action.hpp"
+#include "hatrix/actions/open.hpp"
+#include "hatrix/actions/close.hpp"
 #include "hatrix/gamemap.hpp"
 #include "hatrix/utils/position.hpp"
 
@@ -239,6 +241,14 @@ void Renderer::handle_play_mode_input(int c)
         break;
 
     case 'o':
+        controller->set_action(new ActionOpen());
+        break;
+
+    case 'c':
+        controller->set_action(new ActionClose());
+        break;
+
+    case '?':
         show_code = true;
         debug_mode = true;
         code_mode_on();
@@ -303,7 +313,7 @@ void Renderer::dorender()
 void Renderer::render_ground()
 {
     world->gamemap->update_fov();
-    for (Position p : world->gamemap->visible_position)
+    for (Vec2 p : world->gamemap->visible_position)
     {
         int rx = compute_render_x(p.x);
         int ry = compute_render_y(p.y);
@@ -314,13 +324,13 @@ void Renderer::render_ground()
 void Renderer::render_world()
 {
     Entity *player = world->get_player();
-    Position player_position = player->position;
+    Vec2 player_position = player->position;
     target_x = player_position.x;
     target_y = player_position.y;
 
     render_ground();
 
-    for (Position p: world->gamemap->visible_position){
+    for (Vec2 p: world->gamemap->visible_position){
         for (Entity * entity : world->gamemap->enumerate_entities_at(p.x, p.y)){
             render_entity(entity);
         };
