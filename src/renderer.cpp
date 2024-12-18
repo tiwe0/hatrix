@@ -276,8 +276,11 @@ void Renderer::dorender()
     doupdate();
 };
 
-void Renderer::render_ground() {
-    for (Position p : world->gamemap->visible_position){
+void Renderer::render_ground()
+{
+    world->gamemap->update_fov();
+    for (Position p : world->gamemap->visible_position)
+    {
         int rx = compute_render_x(p.x);
         int ry = compute_render_y(p.y);
         mvaddch(ry, rx, '.');

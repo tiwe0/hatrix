@@ -17,7 +17,7 @@ World::World() : should_quit(false)
     controller = new Controller();
     renderer = new Renderer(this, controller);
     core = new TheCore(this);
-    updater = new Updater(this, 1.0);
+    updater = new Updater(this, 60.0);
 };
 
 void World::render()

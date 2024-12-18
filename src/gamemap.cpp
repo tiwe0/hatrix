@@ -76,6 +76,10 @@ bool Gamemap::is_opaque(int x, int y) {
 };
 
 void Gamemap::update_fov() {
+    doupdate_fov();
+};
+
+void Gamemap::doupdate_fov(){
     visible_position.clear();
     Entity * player = world->get_player();
     Position p = world->get_entity_position(player->id);
@@ -86,7 +90,7 @@ void Gamemap::update_fov() {
             [this](int _x, int _y){visible_position.push_back(Position{_x, _y});},
             (float) distance
     );
-};
+}
 
 const std::vector<Entity *> Gamemap::enumerate_entities_at(int x, int y){
     std::vector<Entity*> entities;

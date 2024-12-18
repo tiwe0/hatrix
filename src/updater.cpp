@@ -49,9 +49,6 @@ bool Updater::should_update()
 
 void Updater::doupdate()
 {
-    if(world->get_player()!= nullptr){
-        world->gamemap->update_fov();
-    }
     for (Entity *entity : world->enumerate_entities())
     {
         update_entity(entity);

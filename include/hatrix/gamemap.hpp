@@ -30,9 +30,13 @@ class Gamemap{
 
         std::vector<Position> visible_position;
 
+        bool should_update_fov;
+        bool should_render_fov;
+        void doupdate_fov();
         void update_fov();
 
     private:
+        bool update_flag = false;
         World *world;
 
         std::vector<Entity *> entities_vec;
