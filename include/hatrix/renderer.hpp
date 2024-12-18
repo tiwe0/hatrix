@@ -56,6 +56,7 @@ private:
     PANEL *panels[4];
 
     // 渲染器状态
+    bool show_debug = false;
     bool show_inventory = false;
     bool show_code = false;
     bool code_mode = false;

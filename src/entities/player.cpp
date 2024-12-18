@@ -4,6 +4,7 @@
 
 Player::Player() {
     glyph = '@';
+    type = EntityType::NORMAL;
 };
 
 Action *Player::make_decision_as_npc()

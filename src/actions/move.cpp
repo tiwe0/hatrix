@@ -10,5 +10,5 @@ float ActionMove::perform(Entity* entity) {
 };
 
 ActionMove::operator std::string() const {
-    return std::string("Move");
+    return std::string("Move: ") + std::to_string(dx) + std::string(", ") + std::to_string(dy);
 };

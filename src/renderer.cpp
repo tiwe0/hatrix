@@ -79,7 +79,7 @@ void Renderer::init()
     hide_panel(panels[2]);
 
     // 新建 debug window
-    windows[3] = newwin(5, window_width, window_height - 5, 0);
+    windows[3] = newwin(28, 89, 2, 2);
     panels[3] = new_panel(windows[3]);
     hide_panel(panels[3]);
 };
@@ -192,7 +192,7 @@ void Renderer::handle_play_mode_input(int c)
         world->should_quit = true;
         break;
 
-    case '\t':
+    case 'i':
         show_inventory = (!show_inventory);
         if (show_inventory)
         {
@@ -201,6 +201,18 @@ void Renderer::handle_play_mode_input(int c)
         else
         {
             hide_panel(panels[1]);
+        }
+        break;
+
+    case '\t':
+        show_debug = !show_debug;
+        if (show_debug)
+        {
+            show_panel(panels[3]);
+        }
+        else
+        {
+            hide_panel(panels[3]);
         }
         break;
 
@@ -365,7 +377,17 @@ void Renderer::render_inventory_panel()
 
 void Renderer::render_debug_panel()
 {
-    ;
+    if (!show_debug)
+        return;
+    box(windows[3], 0, 0);
+    int i = 0;
+    mvwprintw(windows[3], 0, 0, "Debug");
+    mvwprintw(windows[3], ++i, 1, "window size: (%d, %d)", window_width, window_height);
+    mvwprintw(windows[3], ++i, 1, "player action: [%s]", std::string(*controller->get_action()).c_str());
+    mvwprintw(windows[3], ++i, 1, "player position: (%d, %d)", world->get_player()->position.x, world->get_player()->position.y);
+    mvwprintw(windows[3], ++i, 1, "mouse position: (%d, %d)", mouse_x, mouse_y);
+    mvwprintw(windows[3], ++i, 1, "last error: %s", world->core->last_eval_error.c_str());
+    mvwprintw(windows[3], ++i, 1, world->message.c_str());
 }
 
 static int render_row, render_col;
@@ -438,10 +460,6 @@ void Renderer::render_ui()
     render_inventory_panel();
     render_code_panel();
     render_debug_panel();
-
-    mvprintw(window_height - 6, 1, "Window size (%d, %d)", window_width, window_height);
-    mvprintw(window_height - 5, 1, "last error: (%s)", world->core->last_eval_error.c_str());
-    mvprintw(window_height - 4, 1, world->message.c_str());
 };
 
 void Renderer::code_mode_on()
