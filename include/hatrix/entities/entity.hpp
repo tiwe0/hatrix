@@ -32,7 +32,7 @@ class Entity
         Action *make_decision_as_player();
         virtual Action *make_decision_as_npc() = 0;
 
-        chtype glyph;
+        cchar_t glyph;
         std::string id;
         bool blocking;
         bool opaque;
@@ -42,6 +42,5 @@ class Entity
         World *world;
         Controller *controller = nullptr;
         float busy_time = 0;
-
 };
 #endif

@@ -6,16 +6,18 @@
 
 Door::Door(bool is_open) : is_open(is_open) {
     if(is_open){
-        glyph = '/';
+
+    setcchar(&glyph, L"/", A_NORMAL, 0, nullptr);
     } else {
-        glyph = '+';
+
+    setcchar(&glyph, L"+", A_NORMAL, 0, nullptr);
     };
     blocking = !is_open;
     opaque = !is_open;
 };
 
 bool Door::open() {
-    glyph = '/';
+    setcchar(&glyph, L"/", A_NORMAL, 0, nullptr);
     is_open = false;
     blocking = false;
     opaque = false;
@@ -23,7 +25,7 @@ bool Door::open() {
 };
 
 bool Door::close() {
-    glyph = '+';
+    setcchar(&glyph, L"+", A_NORMAL, 0, nullptr);
     is_open = true;
     blocking = true;
     opaque = true;

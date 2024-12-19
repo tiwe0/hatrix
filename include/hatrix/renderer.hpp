@@ -2,13 +2,14 @@
 #ifndef HATRIX_RENDERER
 #define HATRIX_RENDERER
 
+#include <wchar.h>
 #include <unistd.h> // 用于 usleep
-#include <ncurses.h>
 #include <stdio.h>
 #include <chrono> // 用于获取时间
 #include <sys/ioctl.h> // 获取终端大小
 #include <unistd.h>
 #include <panel.h>
+#include <ncurses.h>
 
 class World;
 class Controller;

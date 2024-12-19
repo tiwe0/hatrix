@@ -12,7 +12,7 @@
 class Wall : public StaticEntity
 {
 public:
-    static std::map<int, std::vector<chtype>> mask_to_glyph;
+    static std::map<int, std::vector<const wchar_t>> mask_to_glyph;
     Wall();
     Action *make_decision_as_npc() override;
     void update_glyph();

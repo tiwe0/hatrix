@@ -329,14 +329,14 @@ int Renderer::compute_render_y(int y) {
 
 void Renderer::render_entity(Entity *entity)
 {
-    char glyph = entity->glyph;
+    cchar_t* glyph = &(entity->glyph);
     int x = entity->position.x;
     int y = entity->position.y;
     if (in_viewver(y, x))
     {
         int rx = compute_render_x(x);
         int ry = compute_render_y(y);
-        mvaddch(ry, rx, glyph);
+        mvadd_wch(ry, rx, glyph);
     };
 };
 
@@ -375,7 +375,7 @@ void Renderer::render_debug_panel()
     mvwprintw(windows[3], ++i, 1, "cross: %s", "┼");
     mvwprintw(windows[3], ++i, 1, world->message.c_str());
     mvwaddstr(windows[3], ++i, 1, "\U0001F600");
-    mvwaddch(windows[3], 3, 3, L'┼');
+    mvwaddwstr(windows[3], 11, 1, L"┼");
 }
 
 void Renderer::render_code_panel()

@@ -3,7 +3,7 @@
 #include "hatrix/actions/null.hpp"
 
 Player::Player() {
-    glyph = '@';
+    setcchar(&glyph, L"@", A_NORMAL, 0, nullptr);
 };
 
 Action *Player::make_decision_as_npc()

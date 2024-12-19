@@ -7,8 +7,9 @@
 #include "hatrix/utils/position.hpp"
 
 
-Entity::Entity() : glyph('@')
+Entity::Entity()
 {
+    setcchar(&glyph, L"@", A_NORMAL, 0, nullptr);
     id = generate_timestamp_id();
 };
 
