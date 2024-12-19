@@ -89,7 +89,7 @@ const std::list<Entity *> &World::enumerate_entities(){
     return gamemap->enumerate_entities();
 };
 
-Entity *World::get_player()
+Character *World::get_player()
 {
     return controller->get_player();
 };
@@ -99,7 +99,7 @@ Action* World::get_action()
     return controller->get_action();
 };
 
-void World::set_player(Entity *player)
+void World::set_player(Character *player)
 {
     controller->set_player(player);
 };

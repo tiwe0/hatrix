@@ -1,6 +1,8 @@
 #ifndef HATRIX_ENTITIES_CHARACTER
 #define HATRIX_ENTITIES_CHARACTER
+#include <vector>
 #include "hatrix/entities/normal_entity.hpp"
+#include "hatrix/utils/position.hpp"
 
 class Character: public NormalEntity {
     public:
@@ -15,6 +17,8 @@ class Character: public NormalEntity {
         int money = 0;
         int vision = 10;
         Action *current_action = nullptr;
+
+        std::vector<Vec2> fov;
 };
 
 #endif

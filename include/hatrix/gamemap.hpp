@@ -10,6 +10,7 @@
 
 class World;
 class Entity;
+class Character;
 struct Vec2;
 
 class GamemapCell {
@@ -54,6 +55,8 @@ public:
     const std::list<Entity *> &enumerate_entities_at(int x, int y);
     // 查询某一位置 第一个 符合条件的 entity, 没有则返回 nullptr
     Entity *get_first_entity_at_which(int x, int y, std::function<bool(Entity *)> cond);
+    // 查询某一位置 渲染 entity, 没有则返回 nullptr
+    Entity *get_render_entity_at(int x, int y);
 
     // map cell api
     bool is_opaque(int x, int y);
@@ -69,6 +72,7 @@ public:
     bool should_render_fov;
     void doupdate_fov();
     void update_fov();
+    void update_fov(Character *character);
 
 private:
     // -1 时表示无限大

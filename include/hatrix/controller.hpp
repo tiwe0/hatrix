@@ -4,18 +4,19 @@
 class Entity;
 class World;
 class Action;
+class Character;
 
 class Controller {
     public:
         Controller();
-        void set_player(Entity *player);
-        Entity *get_player();
+        void set_player(Character *player);
+        Character *get_player();
         Action *make_decision();
         void set_action(Action* action);
         Action *get_action();
 
     private:
-        Entity *the_entity;
+        Character *the_entity;
         Action *the_action;
 };
 #endif

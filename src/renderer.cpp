@@ -12,6 +12,7 @@
 #include "hatrix/actions/close.hpp"
 #include "hatrix/gamemap.hpp"
 #include "hatrix/utils/position.hpp"
+#include "hatrix/entities/character.hpp"
 
 // stdscr: 36 , 130 , 0, 0
 // status: 3, 130, 33, 0
@@ -313,7 +314,7 @@ void Renderer::dorender()
 void Renderer::render_ground()
 {
     world->gamemap->update_fov();
-    for (Vec2 p : world->gamemap->visible_position)
+    for (Vec2 p : world->get_player()->fov)
     {
         int rx = compute_render_x(p.x);
         int ry = compute_render_y(p.y);
@@ -323,17 +324,18 @@ void Renderer::render_ground()
 
 void Renderer::render_world()
 {
-    Entity *player = world->get_player();
+    Character *player = world->get_player();
     Vec2 player_position = player->position;
     target_x = player_position.x;
     target_y = player_position.y;
 
     render_ground();
 
-    for (Vec2 p: world->gamemap->visible_position){
-        for (Entity * entity : world->gamemap->enumerate_entities_at(p.x, p.y)){
+    for (Vec2 p: world->get_player()->fov){
+        Entity *entity = world->gamemap->get_render_entity_at(p.x, p.y);
+        if(entity != nullptr){
             render_entity(entity);
-        };
+        }
     };
 };
 

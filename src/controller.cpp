@@ -2,6 +2,7 @@
 #include "hatrix/entities/entity.hpp"
 #include "hatrix/world.hpp"
 #include "hatrix/actions/null.hpp"
+#include "hatrix/entities/character.hpp"
 
 Controller::Controller() : the_entity(nullptr), the_action(nullptr) {};
 
@@ -15,7 +16,7 @@ Action* Controller::make_decision(){
     };
 };
 
-void Controller::set_player(Entity *player)
+void Controller::set_player(Character *player)
 {
     if(the_entity != nullptr){
         the_entity->controller = nullptr;
@@ -24,7 +25,7 @@ void Controller::set_player(Entity *player)
     the_entity = player;
 };
 
-Entity *Controller::get_player()
+Character *Controller::get_player()
 {
     return the_entity;
 };
