@@ -1,13 +1,12 @@
 #ifndef HATRIX_ENTITIES_WALL
 #define HATRIX_ENTITIES_WALL
 
-#include "hatrix/entities/entity.hpp"
+#include "hatrix/entities/static_entity.hpp"
 
-class Wall : public Entity
+class Wall : public StaticEntity
 {
 public:
     Wall();
-    ~Wall() override;
     Action *make_decision_as_npc() override;
 
 private:

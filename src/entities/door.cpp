@@ -12,10 +12,7 @@ Door::Door(bool is_open) : is_open(is_open) {
     };
     blocking = !is_open;
     opaque = !is_open;
-    type = EntityType::STATIC;
 };
-
-Door::~Door() { };
 
 bool Door::open() {
     glyph = '/';
