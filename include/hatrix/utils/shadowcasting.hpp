@@ -5,6 +5,8 @@
 #ifndef HATRIX_SHADOWCASTING_HPP
 #define HATRIX_SHADOWCASTING_HPP
 
+#define BIG_NUMBER 25565
+
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -93,7 +95,7 @@ void scan_iterative(const Row& row, const std::pair<int, int>& origin,
         Row current_row = rows.back();  // Equivalent to row = rows.pop()
         rows.pop_back();  // Remove the last element
 
-        std::pair<int, int> prev_tile = {INFINITY, INFINITY};  // Initialize with an invalid tile
+        std::pair<int, int> prev_tile = {BIG_NUMBER, BIG_NUMBER};  // Initialize with an invalid tile
         for (const auto& tile : tiles(current_row, max_distance)) {
             if (is_wall(tile.first, tile.second) || is_symmetric(current_row, tile)) {
                 reveal(tile.first, tile.second);
@@ -137,8 +139,8 @@ void utils_compute_fov(std::pair<int, int> origin,
 
         // Is wall function
         auto is_wall = [&quadrant, &origin, &is_blocking](int row, int col) -> bool {
-            if (row == INFINITY || col == INFINITY){
-                return true;
+            if (row == BIG_NUMBER || col == BIG_NUMBER){
+                return false;
             };
             auto transformed = transform(quadrant, origin, std::make_pair(row, col));
             return is_blocking(transformed.first, transformed.second);
@@ -146,6 +148,9 @@ void utils_compute_fov(std::pair<int, int> origin,
 
         // Is floor function
         auto is_floor = [&quadrant, &origin, &is_blocking](int row, int col) -> bool {
+            if (row == BIG_NUMBER || col == BIG_NUMBER){
+                return false;
+            };
             auto transformed = transform(quadrant, origin, std::make_pair(row, col));
             return !is_blocking(transformed.first, transformed.second);
         };

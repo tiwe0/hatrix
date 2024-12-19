@@ -14,6 +14,7 @@ class Controller;
 class Renderer;
 class Updater;
 class Gamemap;
+class Character;
 struct Vec2;
 
 class World
@@ -40,11 +41,12 @@ class World
         const std::list<Entity *> &enumerate_entities();
 
         // controller api
-        Entity *get_player();
-        void set_player(Entity *player);
+        Character *get_player();
+        void set_player(Character *player);
 
         // core api
         void core_eval(const char *cmd);
+        int get_stability();
 
         // world api
         void print(const std::string message);

@@ -13,6 +13,7 @@
 class World;
 class Controller;
 class Entity;
+class Editor;
 
 class Renderer
 {
@@ -55,6 +56,9 @@ private:
     WINDOW *windows[4];
     PANEL *panels[4];
 
+    // 代码编辑器
+    Editor* code_editor;
+
     // 渲染器状态
     bool show_debug = false;
     bool show_inventory = false;
@@ -74,15 +78,6 @@ private:
 
     int compute_render_x(int x);
     int compute_render_y(int y);
-
-    // Code Editor
-    char buffer[87 * 24];
-
-    // Debug Editor
-    char debug_buffer[1024 * 5];
-
-    int code_x = 0;
-    int code_y = 0;
 
     float fps;
     float last_time;

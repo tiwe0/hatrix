@@ -6,6 +6,7 @@
 #include "hatrix/utils/shadowcasting.hpp"
 #include "hatrix/entities/player.hpp"
 #include "hatrix/entities/door.hpp"
+#include "hatrix/entities/wall.hpp"
 
 GamemapCell::GamemapCell(int x, int y) : blocking(false), opaque(false) {
     position.x = x;
@@ -165,6 +166,18 @@ Entity *Gamemap::get_first_entity_at_which(int x, int y, std::function<bool(Enti
     return nullptr;
 };
 
+Entity *Gamemap::get_render_entity_at(int x, int y) {
+    Entity *entity = get_first_entity_at_which(x, y, [](Entity *the_entity)
+                                               { return typeid(*the_entity) == typeid(Character); });
+    if(entity == nullptr ){
+        if(enumerate_entities_at(x, y).size() == 0){
+            return nullptr;
+        };
+        return enumerate_entities_at(x, y).front();
+    };
+    return entity;
+};
+
 bool Gamemap::is_opaque(int x, int y) {
     return get_cell(x, y)->opaque;
 };
@@ -177,15 +190,39 @@ void Gamemap::update_fov() {
     doupdate_fov();
 };
 
-void Gamemap::doupdate_fov(){
-    visible_position.clear();
-    Entity * player = world->get_player();
-    Vec2 p = player->position;
-    int distance = ((Player*)player)->vision;
+void Gamemap::update_fov(Character *character){
+    character->fov.clear();
     utils_compute_fov(
-            std::pair(p.x, p.y),
+            std::pair(character->position.x, character->position.y),
             [this](int _x, int _y){return is_opaque(_x, _y);},
-            [this](int _x, int _y){visible_position.push_back(Vec2{_x, _y});},
-            (float) distance
+            [character](int _x, int _y){character->fov.push_back(Vec2{_x, _y});},
+            (float) character->vision
     );
+};
+
+void Gamemap::doupdate_fov(){
+    Character *player = world->get_player();
+    update_fov(player);
 }
+
+bool Gamemap::has_entity_at_which(int x, int y, std::function<bool(Entity *)> cond) {
+    return get_first_entity_at_which(x, y, cond) != nullptr;
+};
+
+void Gamemap::update_wall_glyph_in_range(int x, int y){
+    update_wall_glyph(x, y);
+    update_wall_glyph(x+1, y);
+    update_wall_glyph(x, y+1);
+    update_wall_glyph(x-1, y);
+    update_wall_glyph(x, y-1);
+};
+
+void Gamemap::update_wall_glyph(int x, int y) {
+    Entity *entity = get_first_entity_at_which(x, y, [](Entity *entity)
+                                               { return typeid(*entity) == typeid(Wall); });
+    if(entity == nullptr){
+        return;
+    };
+    Wall *wall = (Wall *)entity;
+    wall->update_glyph();
+};

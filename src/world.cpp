@@ -10,6 +10,7 @@
 #include "hatrix/updater.hpp"
 #include "hatrix/gamemap.hpp"
 #include "hatrix/utils/position.hpp"
+#include "hatrix/entities/wall.hpp"
 
 
 World::World() : should_quit(false)
@@ -67,6 +68,10 @@ void World::add_entity(Entity *entity, int x, int y)
     entity->position.x = x;
     entity->position.y = y;
     gamemap->add_entity(entity);
+
+    if(typeid(*entity) == typeid(Wall)){
+        gamemap->update_wall_glyph(x, y);
+    };
 };
 
 void World::remove_entity(Entity *entity) {
@@ -89,7 +94,11 @@ const std::list<Entity *> &World::enumerate_entities(){
     return gamemap->enumerate_entities();
 };
 
-Entity *World::get_player()
+int World::get_stability(){
+    return core->stability;
+}
+
+Character *World::get_player()
 {
     return controller->get_player();
 };
@@ -99,7 +108,7 @@ Action* World::get_action()
     return controller->get_action();
 };
 
-void World::set_player(Entity *player)
+void World::set_player(Character *player)
 {
     controller->set_player(player);
 };

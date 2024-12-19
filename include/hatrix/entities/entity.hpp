@@ -2,6 +2,7 @@
 #define HATRIX_ENTITY
 #include <string>
 #include "hatrix/utils/position.hpp"
+#include <ncurses.h>
 
 class Controller;
 class World;
@@ -31,7 +32,7 @@ class Entity
         Action *make_decision_as_player();
         virtual Action *make_decision_as_npc() = 0;
 
-        char glyph;
+        chtype glyph;
         std::string id;
         bool blocking;
         bool opaque;

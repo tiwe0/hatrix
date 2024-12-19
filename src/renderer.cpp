@@ -12,6 +12,8 @@
 #include "hatrix/actions/close.hpp"
 #include "hatrix/gamemap.hpp"
 #include "hatrix/utils/position.hpp"
+#include "hatrix/entities/character.hpp"
+#include "hatrix/ui/editor.hpp"
 
 // stdscr: 36 , 130 , 0, 0
 // status: 3, 130, 33, 0
@@ -21,6 +23,9 @@
 Renderer::Renderer(World *world, Controller *controller) : world(world), controller(controller), fps(60.0), dead_time(0.0), last_key('\0')
 {
     init();
+    code_editor = new Editor(89, 28);
+    code_editor->move(3, 3);
+    code_editor->hide();
 };
 
 Renderer::~Renderer()
@@ -38,6 +43,10 @@ void handle_resize(int signal)
 
 void Renderer::init()
 {
+    std::srand(std::time(nullptr));
+    // unicode 模式
+    setlocale(LC_ALL, "");
+
     // 初始化 curses
     initscr();
     cbreak();
@@ -74,11 +83,6 @@ void Renderer::init()
     windows[1] = newwin(28, 24, 3, 3);
     panels[1] = new_panel(windows[1]);
     hide_panel(panels[1]);
-
-    // 新建 code window
-    windows[2] = newwin(28, 89, 3, 30);
-    panels[2] = new_panel(windows[2]);
-    hide_panel(panels[2]);
 
     // 新建 debug window
     windows[3] = newwin(28, 89, 2, 2);
@@ -141,47 +145,20 @@ void Renderer::handle_mouse_input()
 
 void Renderer::handle_code_mode_input(int c)
 {
-    int position = code_y * code_width + code_x;
     switch (c)
     {
     // Esc
-    case '\033':
-        show_code = false;
+    case 27:
         code_mode_off();
-        hide_panel(panels[2]);
+        code_editor->hide();
         if(debug_mode){
             debug_mode = false;
-            world->core_eval(buffer);
+            world->core_eval(code_editor->get_content());
         };
         break;
 
-    // Del
-    case '\177':
-        if (position <= 0)
-        {
-            break;
-        }
-        buffer[position-1] = '\0';
-        code_x -= 1;
-        if (code_x <= -1){
-            code_x = code_width - 1;
-            code_y -= 1;
-        }
-        break;
-
     default:
-        if (position >= code_width * code_height)
-        {
-            break;
-        }
-        buffer[position] = c;
-        code_x += 1;
-        if (code_x == code_width)
-        {
-            code_x = 0;
-            code_y += 1;
-        }
-        break;
+        code_editor->handle_char(c);
     }
 };
 
@@ -190,7 +167,8 @@ void Renderer::handle_play_mode_input(int c)
 {
     switch (c)
     {
-    case 'q':
+    // Esc
+    case 27:
         world->should_quit = true;
         break;
 
@@ -234,12 +212,6 @@ void Renderer::handle_play_mode_input(int c)
         controller->set_action(new ActionMove(1, 0));
         break;
 
-    case ' ':
-        show_code = true;
-        code_mode_on();
-        show_panel(panels[2]);
-        break;
-
     case 'o':
         controller->set_action(new ActionOpen());
         break;
@@ -252,7 +224,7 @@ void Renderer::handle_play_mode_input(int c)
         show_code = true;
         debug_mode = true;
         code_mode_on();
-        show_panel(panels[2]);
+        code_editor->show();
         break;
 
     case 'p':
@@ -298,10 +270,9 @@ bool Renderer::shold_render()
 void Renderer::dorender()
 {
     erase();
-    for (int i = 0; i < 3; i++)
-    {
-        werase(windows[i]);
-    };
+    werase(windows[0]);
+    werase(windows[1]);
+    werase(windows[3]);
 
     render_world();
     render_ui();
@@ -313,7 +284,7 @@ void Renderer::dorender()
 void Renderer::render_ground()
 {
     world->gamemap->update_fov();
-    for (Vec2 p : world->gamemap->visible_position)
+    for (Vec2 p : world->get_player()->fov)
     {
         int rx = compute_render_x(p.x);
         int ry = compute_render_y(p.y);
@@ -323,17 +294,18 @@ void Renderer::render_ground()
 
 void Renderer::render_world()
 {
-    Entity *player = world->get_player();
+    Character *player = world->get_player();
     Vec2 player_position = player->position;
     target_x = player_position.x;
     target_y = player_position.y;
 
     render_ground();
 
-    for (Vec2 p: world->gamemap->visible_position){
-        for (Entity * entity : world->gamemap->enumerate_entities_at(p.x, p.y)){
+    for (Vec2 p: world->get_player()->fov){
+        Entity *entity = world->gamemap->get_render_entity_at(p.x, p.y);
+        if(entity != nullptr){
             render_entity(entity);
-        };
+        }
     };
 };
 
@@ -368,13 +340,14 @@ void Renderer::render_entity(Entity *entity)
     };
 };
 
-static const char *status_format = "time: %s\thealth: %d%%\thunger: %d%%\tmoney: %d$\tstable: %d%%";
+static const char *status_format = "time: %s\thealth: %d%%\thunger: %d%%\tmoney: %d$\tstablity: %d%%";
 
 void Renderer::render_status_panel()
 {
+    Character *player = world->get_player();
     wborder(windows[0], ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_LTEE, ACS_RTEE, ACS_LLCORNER, ACS_LRCORNER);
     mvwprintw(windows[0], 0, 63, "Status");
-    mvwprintw(windows[0], 1, 10, status_format, world->get_time().c_str(), 23, 42, 38, 88);
+    mvwprintw(windows[0], 1, 10, status_format, world->get_time().c_str(), player->health, player->hunger, player->money, world->get_stability());
 };
 
 void Renderer::render_inventory_panel()
@@ -397,65 +370,19 @@ void Renderer::render_debug_panel()
     mvwprintw(windows[3], ++i, 1, "player position: (%d, %d)", world->get_player()->position.x, world->get_player()->position.y);
     mvwprintw(windows[3], ++i, 1, "mouse position: (%d, %d)", mouse_x, mouse_y);
     mvwprintw(windows[3], ++i, 1, "last error: %s", world->core->last_eval_error.c_str());
+    mvwprintw(windows[3], ++i, 1, "last key pressed: %c", last_key);
+    mvwprintw(windows[3], ++i, 1, "code: %s", code_editor->get_content());
+    mvwprintw(windows[3], ++i, 1, "cross: %s", "┼");
     mvwprintw(windows[3], ++i, 1, world->message.c_str());
-}
-
-static int render_row, render_col;
-
-void reset_render_rc(){
-    render_row = 1;
-    render_col = 1;
-}
-
-void update_render_rc(int code_height, int code_width, char c)
-{
-    if (' ' <= c && c <= '~')
-    {
-        render_col += 1;
-        if (render_col - 1 >= code_width)
-        {
-            render_col = 1;
-            render_row += 1;
-        };
-        return;
-    };
-    if (c == '\t'){
-        render_col += 4;
-        if (render_col - 1 >= code_width)
-        {
-            render_col = 1;
-            render_row += 1;
-        };
-        return;
-    }
-    if (c == '\n'){
-        render_col = 1;
-        render_row += 1;
-        return;
-    }
+    mvwaddstr(windows[3], ++i, 1, "\U0001F600");
+    mvwaddch(windows[3], 3, 3, L'┼');
 }
 
 void Renderer::render_code_panel()
 {
     if (!show_code)
         return;
-    box(windows[2], 0, 0);
-    mvwprintw(windows[2], 0, 42, "Code");
-
-    mvwprintw(windows[2], 0, 0, "(%d, %d)", render_row, render_col);
-
-    reset_render_rc();
-
-    for (char *p = buffer; ((int)(p - buffer) < code_height * code_width && (*p != '\0')); p++)
-    {
-        char c = *p;
-        if (' '<=c && c <= '~'){
-            mvwaddch(windows[2], render_row, render_col, c);
-        }
-        update_render_rc(code_height, code_width, c);
-    }
-
-    wmove(windows[2], render_row, render_col);
+    code_editor->render();
 };
 
 void Renderer::render_ui()
@@ -475,13 +402,9 @@ void Renderer::render_ui()
 void Renderer::code_mode_on()
 {
     code_mode = true;
-    echo();
-    curs_set(1);
 };
 
 void Renderer::code_mode_off()
 {
     code_mode = false;
-    noecho();
-    curs_set(0);
 };

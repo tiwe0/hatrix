@@ -1,7 +1,14 @@
 #include "hatrix/core/the_core.hpp"
-#include "hatrix/entities/wall.hpp"
-#include "hatrix/entities/entity.hpp"
+
 #include "hatrix/world.hpp"
+
+#include "hatrix/entities/entity.hpp"
+#include "hatrix/entities/static_entity.hpp"
+#include "hatrix/entities/normal_entity.hpp"
+#include "hatrix/entities/wall.hpp"
+#include "hatrix/entities/door.hpp"
+#include "hatrix/entities/character.hpp"
+#include "hatrix/entities/player.hpp"
 #include <luabridge3/LuaBridge/LuaBridge.h>
 
 TheCore::TheCore(World *world) : world(world)
@@ -9,13 +16,32 @@ TheCore::TheCore(World *world) : world(world)
     L = luaL_newstate();
     luaL_openlibs(L);
 
+    registe_entity_class();
+    registe_world_instance();
+};
+
+void TheCore::registe_entity_class() {
     luabridge::getGlobalNamespace(L)
         .beginClass<Entity>("Entity")
         .endClass()
-        .deriveClass<Wall, Entity>("Wall")
+        .deriveClass<StaticEntity, Entity>("StaticEntity")
+        .endClass()
+        .deriveClass<NormalEntity, Entity>("NormalEntity")
+        .endClass()
+        .deriveClass<Wall, StaticEntity>("Wall")
         .addConstructor<void()>()
-        .endClass();
+        .endClass()
+        .deriveClass<Door, StaticEntity>("Door")
+        .addConstructor<void()>()
+        .endClass()
+        .deriveClass<Character, NormalEntity>("Character")
+        .endClass()
+        .deriveClass<Player, NormalEntity>("Player")
+        .addConstructor<void()>()
+        .endClass() ;
+};
 
+void TheCore::registe_world_instance() {
     luabridge::getGlobalNamespace(L)
         .beginClass<World>("World")
         .addProperty("core_connected", &World::core_connected)

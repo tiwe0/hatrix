@@ -16,8 +16,13 @@ class TheCore{
 
         std::string last_eval_error;
 
+        int stability = 100;
+
     private:
         lua_State *L;
         World *world;
+
+        void registe_entity_class();
+        void registe_world_instance();
 };
 #endif
