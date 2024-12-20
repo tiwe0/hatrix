@@ -83,8 +83,10 @@ public:
     bool close(int x, int y);
 
     // vec
-
     std::vector<Vec2> visible_position;
+
+    // path
+    std::vector<Vec2> get_path(int start_x, int start_y, int end_x, int end_y);
 
     bool should_update_fov;
     bool should_render_fov;

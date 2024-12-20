@@ -1,93 +1,168 @@
+// https://github.com/daancode/a-star/blob/master/source/AStar.cpp
+/*
+    Copyright (c) 2015, Damian Barczynski <daan.net@wp.eu>
+    Following tool is licensed under the terms and conditions of the ISC license.
+    For more information visit https://opensource.org/licenses/ISC.
+*/
+
 #include "hatrix/utils/position.hpp"
 #include "hatrix/utils/pathfinder.hpp"
 
-#include <iostream>
 #include <vector>
 #include <queue>
 #include <unordered_map>
-#include <cmath>
+#include <algorithm>
+#include <math.h>
 #include <functional>
+#include <set>
 
-// 哈希函数，使 Vec2 能作为 unordered_map 的 key
-namespace std {
-    template <>
-    struct hash<Vec2> {
-        size_t operator()(const Vec2& v) const {
-            return std::hash<int>()(v.x) ^ std::hash<int>()(v.y);
-        }
-    };
-}
+using namespace std::placeholders;
 
-struct Node {
-    Vec2 position;
-    int g_cost; // 从起点到当前节点的代价
-    int h_cost; // 从当前节点到目标节点的启发式代价
-    int f_cost() const { return g_cost + h_cost; } // f(n) = g(n) + h(n)
-    Vec2 parent; // 父节点，用于回溯路径
+using uint = unsigned int;
+using HeuristicFunction = std::function<uint(Vec2, Vec2)>;
 
-    Node() : position(0, 0), g_cost(0), h_cost(0), parent(0, 0) {}
-    Node(Vec2 pos, int g, int h, Vec2 parent)
-        : position(pos), g_cost(g), h_cost(h), parent(parent) {}
+struct Node
+{
+    uint G, H;
+    Vec2 coordinates;
+    Node *parent;
+
+    Node(Vec2 coord_, Node *parent_ = nullptr);
+    uint getScore();
 };
 
-std::vector<Vec2> utils_compute_path(Vec2 start, Vec2 target, int radius, std::function<bool(int, int)> is_blocking) {
-    std::unordered_map<Vec2, Node> open_list;  // 存储待评估的节点
-    std::unordered_map<Vec2, bool> closed_list; // 存储已评估的节点
+using NodeSet = std::vector<Node *>;
 
-    open_list.insert(std::pair(start, Node(start, 0, start.manhattan_distance(target), start)));
+Node::Node(Vec2 coordinates_, Node *parent_)
+{
+    parent = parent_;
+    coordinates = coordinates_;
+    G = H = 0;
+}
 
-    std::vector<Vec2> directions = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}}; // 4个方向（上下左右）
+uint Node::getScore()
+{
+    return G + H;
+}
 
-    while (!open_list.empty()) {
-        // 选择 f 值最小的节点
-        auto current_iter = open_list.begin();
-        for (auto it = open_list.begin(); it != open_list.end(); ++it) {
-            if (it->second.f_cost() < current_iter->second.f_cost()) {
-                current_iter = it;
+Node *findNodeOnList(NodeSet &nodes_, Vec2 coordinates_)
+{
+    for (auto node : nodes_)
+    {
+        if (node->coordinates == coordinates_)
+        {
+            return node;
+        }
+    }
+    return nullptr;
+}
+
+void releaseNodes(NodeSet &nodes_)
+{
+    for (auto it = nodes_.begin(); it != nodes_.end();)
+    {
+        delete *it;
+        it = nodes_.erase(it);
+    }
+}
+
+Vec2 getDelta(Vec2 source_, Vec2 target_)
+{
+    return {abs(source_.x - target_.x), abs(source_.y - target_.y)};
+}
+
+uint manhattan(Vec2 source_, Vec2 target_)
+{
+    auto delta = std::move(getDelta(source_, target_));
+    return static_cast<uint>(10 * (delta.x + delta.y));
+}
+
+uint euclidean(Vec2 source_, Vec2 target_)
+{
+    auto delta = std::move(getDelta(source_, target_));
+    return static_cast<uint>(10 * sqrt(pow(delta.x, 2) + pow(delta.y, 2)));
+}
+
+uint octagonal(Vec2 source_, Vec2 target_)
+{
+    auto delta = std::move(getDelta(source_, target_));
+    return 10 * (delta.x + delta.y) + (-6) * std::min(delta.x, delta.y);
+}
+
+static int directions = 4;
+static std::vector<Vec2> direction = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+static HeuristicFunction heuristic = manhattan;
+
+std::vector<Vec2> utils_compute_path(Vec2 source_, Vec2 target_, int radius, std::function<bool(int, int)> is_blocking)
+{
+    Node *current = nullptr;
+    NodeSet openSet, closedSet;
+    openSet.reserve(100);
+    closedSet.reserve(100);
+    openSet.push_back(new Node(source_));
+
+    while (!openSet.empty())
+    {
+        auto current_it = openSet.begin();
+        current = *current_it;
+
+        for (auto it = openSet.begin(); it != openSet.end(); it++)
+        {
+            auto node = *it;
+            if (node->getScore() <= current->getScore())
+            {
+                current = node;
+                current_it = it;
             }
         }
-        Vec2 current_pos = current_iter->first;
-        Node current_node = current_iter->second;
 
-        // 如果到达目标，构建路径
-        if (current_pos == target) {
-            std::vector<Vec2> path;
-            Vec2 path_node = target;
-            while (path_node != start) {
-                path.push_back(path_node);
-                path_node = current_node.parent;
-                current_node = open_list[path_node];
-            }
-            path.push_back(start);
-            std::reverse(path.begin(), path.end());
-            return path;
+        if (current->coordinates == target_)
+        {
+            break;
         }
 
-        open_list.erase(current_pos);  // 移除当前节点
+        closedSet.push_back(current);
+        openSet.erase(current_it);
 
-        // 将当前节点加入到 closed_list
-        closed_list[current_pos] = true;
-
-        // 检查相邻的节点
-        for (const auto& dir : directions) {
-            Vec2 neighbor(current_pos.x + dir.x, current_pos.y + dir.y);
-
-            // 忽略不可通行或已经访问过的节点
-            if (is_blocking(neighbor.x, neighbor.y) || closed_list.count(neighbor)) {
+        for (uint i = 0; i < directions; ++i)
+        {
+            Vec2 newCoordinates(current->coordinates + direction[i]);
+            int x = newCoordinates.x;
+            int y = newCoordinates.y;
+            int distance =std::floor((newCoordinates - source_).norm());
+            if (is_blocking(x, y) || (distance > radius) ||
+                findNodeOnList(closedSet, newCoordinates))
+            {
                 continue;
             }
 
-            // 计算 G 和 H 值
-            int g_cost = current_node.g_cost + 1;  // 假设每步的代价为 1
-            int h_cost = neighbor.manhattan_distance(target);  // 使用曼哈顿距离作为启发式函数
+            uint totalCost = current->G + ((i < 4) ? 10 : 14);
 
-            // 如果节点已在 open_list 中且新的路径更优，更新它
-            if (open_list.count(neighbor) == 0 || g_cost < open_list[neighbor].g_cost) {
-                open_list[neighbor] = Node(neighbor, g_cost, h_cost, current_pos);
+            Node *successor = findNodeOnList(openSet, newCoordinates);
+            if (successor == nullptr)
+            {
+                successor = new Node(newCoordinates, current);
+                successor->G = totalCost;
+                successor->H = heuristic(successor->coordinates, target_);
+                openSet.push_back(successor);
+            }
+            else if (totalCost < successor->G)
+            {
+                successor->parent = current;
+                successor->G = totalCost;
             }
         }
     }
 
-    // 如果没有路径找到，返回空路径
-    return {};
+    std::vector<Vec2> path;
+    while (current != nullptr)
+    {
+        path.push_back(current->coordinates);
+        current = current->parent;
+    }
+
+    releaseNodes(openSet);
+    releaseNodes(closedSet);
+
+    return path;
 }

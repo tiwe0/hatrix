@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS OFF)
 add_compile_definitions(D_XOPEN_SOURCE_EXTENDED=1)
 add_compile_definitions(NCURSES_WIDECHAR=1)
+add_compile_definitions(HATRIX_DEBUG=1)
 
 project(Hatrix)
 

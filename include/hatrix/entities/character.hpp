@@ -19,6 +19,7 @@ class Character: public NormalEntity {
         Action *current_action = nullptr;
 
         std::vector<Vec2> fov;
+        std::vector<Vec2> path;
 };
 
 #endif

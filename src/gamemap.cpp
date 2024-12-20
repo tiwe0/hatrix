@@ -254,3 +254,7 @@ void Gamemap::update_wall_glyph(int x, int y) {
     Wall *wall = (Wall *)entity;
     wall->update_glyph();
 };
+
+std::vector<Vec2> Gamemap::get_path(int start_x, int start_y, int end_x, int end_y) {
+    return pathfinder->get_path(start_x, start_y, end_x, end_y);
+};

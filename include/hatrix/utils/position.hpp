@@ -1,6 +1,8 @@
 #ifndef HATRIX_UTILS_POSTION
 #define HATRIX_UTILS_POSTION
 #include <cmath>
+#include <string>
+
 struct Vec2
 {
     int x, y;
