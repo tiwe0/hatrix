@@ -91,10 +91,13 @@ uint octagonal(Vec2 source_, Vec2 target_)
 
 static int directions = 4;
 static std::vector<Vec2> direction = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
-static HeuristicFunction heuristic = manhattan;
+static HeuristicFunction heuristic = euclidean;
 
-std::vector<Vec2> utils_compute_path(Vec2 source_, Vec2 target_, int radius, std::function<bool(int, int)> is_blocking)
+std::vector<Vec2> utils_compute_path(Vec2 source_, Vec2 target_, std::function<bool(int, int)> is_blocking)
 {
+    if(is_blocking(target_.x, target_.y)){
+        return {};
+    };
     Node *current = nullptr;
     NodeSet openSet, closedSet;
     openSet.reserve(100);
@@ -129,8 +132,7 @@ std::vector<Vec2> utils_compute_path(Vec2 source_, Vec2 target_, int radius, std
             Vec2 newCoordinates(current->coordinates + direction[i]);
             int x = newCoordinates.x;
             int y = newCoordinates.y;
-            int distance =std::floor((newCoordinates - source_).norm());
-            if (is_blocking(x, y) || (distance > radius) ||
+            if (is_blocking(x, y) ||
                 findNodeOnList(closedSet, newCoordinates))
             {
                 continue;
@@ -163,6 +165,10 @@ std::vector<Vec2> utils_compute_path(Vec2 source_, Vec2 target_, int radius, std
 
     releaseNodes(openSet);
     releaseNodes(closedSet);
+
+    if(path[0] != target_){
+        return {};
+    }
 
     return path;
 }

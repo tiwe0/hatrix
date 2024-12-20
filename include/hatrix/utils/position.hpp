@@ -2,6 +2,7 @@
 #define HATRIX_UTILS_POSTION
 #include <cmath>
 #include <string>
+#include <sstream>
 
 struct Vec2
 {
@@ -47,6 +48,12 @@ struct Vec2
     // 计算欧几里得距离
     float euclidean_distance(const Vec2& target) const {
         return std::sqrt((x - target.x) * (x - target.x) + (y - target.y) * (y - target.y));
+    };
+
+    const std::string to_string() {
+        std::stringstream ss;
+        ss << "[" << x << ", " << y << "]";
+        return ss.str();
     };
 };
 

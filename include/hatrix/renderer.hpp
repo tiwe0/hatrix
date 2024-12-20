@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <panel.h>
 #include <ncurses.h>
+#include <sstream>
 
 class World;
 class Controller;

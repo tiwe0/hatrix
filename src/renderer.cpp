@@ -314,19 +314,22 @@ void Renderer::render_world()
 // DEBUG
 #ifdef HATRIX_DEBUG
 if(mouse_moved){
-    cchar_t c;
-    setcchar(&c, L"*", A_NORMAL, 0, nullptr);
     mouse_moved = false;
     player->path = world->gamemap->get_path(player_position.x, player_position.y, mouse_world_x, mouse_world_y);
-    if(player->path.size()>0){
-    std::vector<Vec2> &path = player->path;
-    for(Vec2& v : path){
-        mvadd_wch(v.y, v.x, &c);
-    };
+};
+cchar_t c;
+setcchar(&c, L"*", A_NORMAL, 0, nullptr);
+std::vector<Vec2> &path = player->path;
+int i = 0;
+for (Vec2 &v : path)
+{
+    if(i == path.size()-1){
+        continue;
     }
-}
+    i++;
+    mvadd_wch(compute_render_y(v.y), compute_render_x(v.x), &c);
+};
 #endif
-
 };
 
 bool Renderer::in_viewver(int y, int x) {
@@ -409,6 +412,13 @@ void Renderer::render_debug_panel()
     //     int mask = wall->mask;
     //     mvwprintw(windows[3], ++i, 1, "wall mask: %s", std::bitset<4>(mask).to_string().c_str());
     // };
+    mvwprintw(windows[3], ++i, 1, "blocking: %s", world->gamemap->is_blocking(mouse_world_x, mouse_world_y)? "yes": "no");
+    mvwprintw(windows[3], ++i, 1, "opaque: %s", world->gamemap->is_opaque(mouse_world_x, mouse_world_y)? "yes": "no");
+    std::stringstream os;
+    for(Vec2& v : world->get_player()->path){
+        os << v.to_string() << "<-";
+    }
+    mvwprintw(windows[3], ++i, 1, "path: %s", os.str().c_str());
 }
 
 void Renderer::render_code_panel()
@@ -444,6 +454,10 @@ void Renderer::code_mode_off()
 
 void Renderer::update_mouse_position(){
     mouse_moved = true;
+
+    last_mouse_x = mouse_x;
+    last_mouse_y = mouse_y;
+
     mouse_x = event.x;
     mouse_y = event.y;
     mouse_action = event.bstate;

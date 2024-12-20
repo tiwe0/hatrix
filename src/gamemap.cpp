@@ -58,10 +58,10 @@ std::vector<Vec2> PathFinder::get_path(int start_x, int start_y, int end_x, int 
     Vec2 start_position = Vec2{start_x, start_y};
     Vec2 end_position = Vec2{end_x, end_y};
     Vec2 diff = start_position - end_position;
-    int radius = static_cast<int>(diff.norm());
-    return utils_compute_path(start_position, end_position, radius,
-                              [this](int _x, int _y)
-                              { return gamemap->is_blocking(_x, _y); });
+    int radius = 2 * static_cast<int>(diff.norm());
+    return utils_compute_path(start_position, end_position,
+                              [this, radius, start_x, start_y](int _x, int _y)
+                              { return gamemap->is_blocking(_x, _y) || (start_x - _x) * (start_x - _x) + (start_y - _y) * (start_y - _y) > radius * radius; });
 };
 
 Gamemap::Gamemap(World *world, int width, int height) : world(world), width(width), height(height) {
