@@ -1,6 +1,7 @@
 // 存储游戏数据的上下文
 #ifndef HATRIX_WORLD
 #define HATRIX_WORLD
+#include "hatrix/utils/position.hpp"
 #include <vector>
 #include <list>
 #include <string>
@@ -15,7 +16,6 @@ class Renderer;
 class Updater;
 class Gamemap;
 class Character;
-struct Vec2;
 
 class World
 {

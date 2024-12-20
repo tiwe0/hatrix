@@ -1,8 +1,10 @@
 #include "hatrix/renderer.hpp"
 #include "hatrix/utils/predicate.hpp"
 #include <bitset>
+#include <vector>
 #include <string>
 #include "hatrix/entities/entity.hpp"
+#include "hatrix/entities/player.hpp"
 #include "hatrix/world.hpp"
 #include "hatrix/core/the_core.hpp"
 #include "hatrix/controller.hpp"
@@ -140,9 +142,7 @@ void Renderer::handle_input()
 
 void Renderer::handle_mouse_input()
 {
-    mouse_x = event.x;
-    mouse_y = event.y;
-    mouse_action = event.bstate;
+    update_mouse_position();
     update_mouse_world_position();
 };
 
@@ -308,8 +308,28 @@ void Renderer::render_world()
         Entity *entity = world->gamemap->get_render_entity_at(p.x, p.y);
         if(entity != nullptr){
             render_entity(entity);
-        }
+        };
     };
+
+// DEBUG
+#ifdef HATRIX_DEBUG
+if(mouse_moved){
+    mouse_moved = false;
+    player->path = world->gamemap->get_path(player_position.x, player_position.y, mouse_world_x, mouse_world_y);
+};
+cchar_t c;
+setcchar(&c, L"*", A_NORMAL, 0, nullptr);
+std::vector<Vec2> &path = player->path;
+int i = 0;
+for (Vec2 &v : path)
+{
+    if(i == path.size()-1){
+        continue;
+    }
+    i++;
+    mvadd_wch(compute_render_y(v.y), compute_render_x(v.x), &c);
+};
+#endif
 };
 
 bool Renderer::in_viewver(int y, int x) {
@@ -380,17 +400,25 @@ void Renderer::render_debug_panel()
     mvwprintw(windows[3], ++i, 1, "player action: [%s]", std::string(*controller->get_action()).c_str());
     mvwprintw(windows[3], ++i, 1, "player position: (%d, %d)", world->get_player()->position.x, world->get_player()->position.y);
     mvwprintw(windows[3], ++i, 1, "mouse position: (%d, %d)", mouse_x, mouse_y);
+    mvwprintw(windows[3], ++i, 1, "mouse last position: (%d, %d)", last_mouse_x, last_mouse_y);
     mvwprintw(windows[3], ++i, 1, "mouse world position: (%d, %d)", mouse_world_x, mouse_world_y);
     mvwprintw(windows[3], ++i, 1, "last error: %s", world->core->last_eval_error.c_str());
     mvwprintw(windows[3], ++i, 1, "last key pressed: %c", last_key);
     mvwprintw(windows[3], ++i, 1, "code: %s", code_editor->get_content());
     mvwprintw(windows[3], ++i, 1, world->message.c_str());
-    Entity *the_entity = world->gamemap->get_first_entity_at_which(mouse_world_x, mouse_world_y, is_wall);
-    if (the_entity != nullptr){
-        Wall *wall = (Wall *)the_entity;
-        int mask = wall->mask;
-        mvwprintw(windows[3], ++i, 1, "wall mask: %s", std::bitset<4>(mask).to_string().c_str());
-    };
+    // Entity *the_entity = world->gamemap->get_first_entity_at_which(mouse_world_x, mouse_world_y, is_wall);
+    // if (the_entity != nullptr){
+    //     Wall *wall = (Wall *)the_entity;
+    //     int mask = wall->mask;
+    //     mvwprintw(windows[3], ++i, 1, "wall mask: %s", std::bitset<4>(mask).to_string().c_str());
+    // };
+    mvwprintw(windows[3], ++i, 1, "blocking: %s", world->gamemap->is_blocking(mouse_world_x, mouse_world_y)? "yes": "no");
+    mvwprintw(windows[3], ++i, 1, "opaque: %s", world->gamemap->is_opaque(mouse_world_x, mouse_world_y)? "yes": "no");
+    std::stringstream os;
+    for(Vec2& v : world->get_player()->path){
+        os << v.to_string() << "<-";
+    }
+    mvwprintw(windows[3], ++i, 1, "path: %s", os.str().c_str());
 }
 
 void Renderer::render_code_panel()
@@ -422,4 +450,15 @@ void Renderer::code_mode_on()
 void Renderer::code_mode_off()
 {
     code_mode = false;
+};
+
+void Renderer::update_mouse_position(){
+    mouse_moved = true;
+
+    last_mouse_x = mouse_x;
+    last_mouse_y = mouse_y;
+
+    mouse_x = event.x;
+    mouse_y = event.y;
+    mouse_action = event.bstate;
 };

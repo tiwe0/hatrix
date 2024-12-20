@@ -11,7 +11,17 @@
 class World;
 class Entity;
 class Character;
-struct Vec2;
+class Gamemap;
+
+class PathFinder{
+    public:
+        PathFinder(Gamemap *gamemap);
+
+        std::vector<Vec2> get_path(int start_x, int start_y, int end_x, int end_y);
+
+    private:
+        Gamemap *gamemap;
+};
 
 class GamemapCell {
     public:
@@ -73,8 +83,10 @@ public:
     bool close(int x, int y);
 
     // vec
-
     std::vector<Vec2> visible_position;
+
+    // path
+    std::vector<Vec2> get_path(int start_x, int start_y, int end_x, int end_y);
 
     bool should_update_fov;
     bool should_render_fov;
@@ -88,6 +100,7 @@ private:
 
     bool update_flag = false;
     World *world;
+    PathFinder *pathfinder;
 
     std::list<Entity *> static_entities;
     std::list<Entity *> normal_entities;

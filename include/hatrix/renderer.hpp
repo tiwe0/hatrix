@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <panel.h>
 #include <ncurses.h>
+#include <sstream>
 
 class World;
 class Controller;
@@ -30,6 +31,8 @@ private:
 
     bool shold_render();
 
+    void update_mouse_position();
+
     void handle_input();
     void handle_mouse_input();
     void handle_keyboard_input(int c);
@@ -41,6 +44,9 @@ private:
     void render_world();
     void render_ground();
     void render_entity(Entity *entity);
+
+    // for debug
+    void render_path(Entity *entity);
 
     void render_ui();
     void render_status_panel();
@@ -66,6 +72,7 @@ private:
     bool show_code = false;
     bool code_mode = false;
     bool debug_mode = false;
+    bool mouse_moved = true;
 
     // render target
     int target_x = 0;
@@ -94,6 +101,9 @@ private:
     int mouse_x;
     int mouse_y;
     int mouse_action;
+
+    int last_mouse_x;
+    int last_mouse_y;
 
     int window_width;
     int window_height;
