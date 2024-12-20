@@ -1,4 +1,6 @@
 #include "hatrix/renderer.hpp"
+#include "hatrix/utils/predicate.hpp"
+#include <bitset>
 #include <string>
 #include "hatrix/entities/entity.hpp"
 #include "hatrix/world.hpp"
@@ -141,6 +143,7 @@ void Renderer::handle_mouse_input()
     mouse_x = event.x;
     mouse_y = event.y;
     mouse_action = event.bstate;
+    update_mouse_world_position();
 };
 
 void Renderer::handle_code_mode_input(int c)
@@ -327,6 +330,14 @@ int Renderer::compute_render_y(int y) {
     return window_height / 2 + dy + offset_y;
 };
 
+void Renderer::update_mouse_world_position() {
+    int _offset_x = mouse_x - window_width / 2;
+    int _offset_y = mouse_y - window_height / 2;
+
+    mouse_world_x = target_x + _offset_x;
+    mouse_world_y = target_y + _offset_y;
+};
+
 void Renderer::render_entity(Entity *entity)
 {
     cchar_t* glyph = &(entity->glyph);
@@ -369,13 +380,17 @@ void Renderer::render_debug_panel()
     mvwprintw(windows[3], ++i, 1, "player action: [%s]", std::string(*controller->get_action()).c_str());
     mvwprintw(windows[3], ++i, 1, "player position: (%d, %d)", world->get_player()->position.x, world->get_player()->position.y);
     mvwprintw(windows[3], ++i, 1, "mouse position: (%d, %d)", mouse_x, mouse_y);
+    mvwprintw(windows[3], ++i, 1, "mouse world position: (%d, %d)", mouse_world_x, mouse_world_y);
     mvwprintw(windows[3], ++i, 1, "last error: %s", world->core->last_eval_error.c_str());
     mvwprintw(windows[3], ++i, 1, "last key pressed: %c", last_key);
     mvwprintw(windows[3], ++i, 1, "code: %s", code_editor->get_content());
-    mvwprintw(windows[3], ++i, 1, "cross: %s", "┼");
     mvwprintw(windows[3], ++i, 1, world->message.c_str());
-    mvwaddstr(windows[3], ++i, 1, "\U0001F600");
-    mvwaddwstr(windows[3], 11, 1, L"┼");
+    Entity *the_entity = world->gamemap->get_first_entity_at_which(mouse_world_x, mouse_world_y, is_wall);
+    if (the_entity != nullptr){
+        Wall *wall = (Wall *)the_entity;
+        int mask = wall->mask;
+        mvwprintw(windows[3], ++i, 1, "wall mask: %s", std::bitset<4>(mask).to_string().c_str());
+    };
 }
 
 void Renderer::render_code_panel()

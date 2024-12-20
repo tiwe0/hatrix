@@ -4,6 +4,7 @@
 #include "hatrix/entities/entity.hpp"
 #include "hatrix/utils/position.hpp"
 #include "hatrix/utils/shadowcasting.hpp"
+#include "hatrix/utils/predicate.hpp"
 #include "hatrix/entities/player.hpp"
 #include "hatrix/entities/door.hpp"
 #include "hatrix/entities/wall.hpp"
@@ -122,8 +123,7 @@ void Gamemap::move_entity(Entity *entity, int dx, int dy) {
 };
 
 bool Gamemap::open(int x, int y) {
-    Entity *the_entity = get_first_entity_at_which(x, y, [](Entity *entity)
-                                                         { return typeid(*entity) == typeid(Door); });
+    Entity *the_entity = get_first_entity_at_which(x, y, is_door);
     Door *the_door = (Door *)the_entity;
     if (the_door == nullptr){
         return false;
@@ -136,8 +136,7 @@ bool Gamemap::open(int x, int y) {
 };
 
 bool Gamemap::close(int x, int y) {
-    Entity *the_entity = get_first_entity_at_which(x, y, [](Entity *entity)
-                                                         { return typeid(*entity) == typeid(Door); });
+    Entity *the_entity = get_first_entity_at_which(x, y, is_door);
     Door *the_door = (Door *)the_entity;
     if (the_door == nullptr){
         return false;
@@ -157,7 +156,7 @@ const std::list<Entity *> &Gamemap::enumerate_entities_at(int x, int y) {
     return get_cell(x, y)->entities;
 };
 
-Entity *Gamemap::get_first_entity_at_which(int x, int y, std::function<bool(Entity *)> cond) {
+Entity *Gamemap::get_first_entity_at_which(int x, int y, const std::function<bool(Entity *)>& cond) {
     for(Entity* entity: enumerate_entities_at(x, y)){
         if(cond(entity)){
             return entity;
@@ -167,8 +166,7 @@ Entity *Gamemap::get_first_entity_at_which(int x, int y, std::function<bool(Enti
 };
 
 Entity *Gamemap::get_render_entity_at(int x, int y) {
-    Entity *entity = get_first_entity_at_which(x, y, [](Entity *the_entity)
-                                               { return typeid(*the_entity) == typeid(Character); });
+    Entity *entity = get_first_entity_at_which(x, y, is_character);
     if(entity == nullptr ){
         if(enumerate_entities_at(x, y).size() == 0){
             return nullptr;
@@ -205,7 +203,7 @@ void Gamemap::doupdate_fov(){
     update_fov(player);
 }
 
-bool Gamemap::has_entity_at_which(int x, int y, std::function<bool(Entity *)> cond) {
+bool Gamemap::has_entity_at_which(int x, int y, const std::function<bool(Entity *)>& cond) {
     return get_first_entity_at_which(x, y, cond) != nullptr;
 };
 
@@ -218,8 +216,7 @@ void Gamemap::update_wall_glyph_in_range(int x, int y){
 };
 
 void Gamemap::update_wall_glyph(int x, int y) {
-    Entity *entity = get_first_entity_at_which(x, y, [](Entity *entity)
-                                               { return typeid(*entity) == typeid(Wall); });
+    Entity *entity = get_first_entity_at_which(x, y, is_wall);
     if(entity == nullptr){
         return;
     };

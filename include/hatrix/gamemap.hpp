@@ -54,12 +54,12 @@ public:
     // 查询某一位置所有 entity
     const std::list<Entity *> &enumerate_entities_at(int x, int y);
     // 查询某一位置 第一个 符合条件的 entity, 没有则返回 nullptr
-    Entity *get_first_entity_at_which(int x, int y, std::function<bool(Entity *)> cond);
+    Entity *get_first_entity_at_which(int x, int y, const std::function<bool(Entity *)>& cond);
     // 查询某一位置 渲染 entity, 没有则返回 nullptr
     Entity *get_render_entity_at(int x, int y);
 
     // 查询某个位置是否有符合条件的entity
-    bool has_entity_at_which(int x, int y, std::function<bool(Entity *)> cond);
+    bool has_entity_at_which(int x, int y,const std::function<bool(Entity *)>& cond);
 
     void update_wall_glyph(int x, int y);
     void update_wall_glyph_in_range(int x, int y);
@@ -71,6 +71,8 @@ public:
     // door
     bool open(int x, int y);
     bool close(int x, int y);
+
+    // vec
 
     std::vector<Vec2> visible_position;
 

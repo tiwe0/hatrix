@@ -75,10 +75,15 @@ private:
     int offset_x = 0;
     int offset_y = 0;
 
+    int mouse_world_x;
+    int mouse_world_y;
+
     bool in_viewver(int y, int x);
 
     int compute_render_x(int x);
     int compute_render_y(int y);
+
+    void update_mouse_world_position();
 
     float fps;
     float last_time;
