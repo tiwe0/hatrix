@@ -1,10 +1,12 @@
 #include <typeinfo>
+#include <cmath>
 #include "hatrix/gamemap.hpp"
 #include "hatrix/world.hpp"
 #include "hatrix/entities/entity.hpp"
 #include "hatrix/utils/position.hpp"
 #include "hatrix/utils/shadowcasting.hpp"
 #include "hatrix/utils/predicate.hpp"
+#include "hatrix/utils/pathfinder.hpp"
 #include "hatrix/entities/player.hpp"
 #include "hatrix/entities/door.hpp"
 #include "hatrix/entities/wall.hpp"
@@ -47,7 +49,24 @@ Entity* GamemapCell::pop_entity(Entity *entity) {
     return entity;
 };
 
-Gamemap::Gamemap(World *world, int width, int height) : world(world), width(width), height(height) {};
+PathFinder::PathFinder(Gamemap *_gamemap) {
+    gamemap = _gamemap;
+};
+
+// TODO 目前是A-star，后续可优化
+std::vector<Vec2> PathFinder::get_path(int start_x, int start_y, int end_x, int end_y) {
+    Vec2 start_position = Vec2{start_x, start_y};
+    Vec2 end_position = Vec2{end_x, end_y};
+    Vec2 diff = start_position - end_position;
+    int radius = static_cast<int>(diff.norm());
+    return utils_compute_path(start_position, end_position, radius,
+                              [this](int _x, int _y)
+                              { return gamemap->is_blocking(_x, _y); });
+};
+
+Gamemap::Gamemap(World *world, int width, int height) : world(world), width(width), height(height) {
+    pathfinder = new PathFinder(this);
+};
 
 Gamemap::~Gamemap() {
     for (Entity *entity : enumerate_entities())

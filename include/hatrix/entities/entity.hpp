@@ -7,7 +7,6 @@
 class Controller;
 class World;
 class Action;
-class Vec2;
 
 enum EntityType
 {

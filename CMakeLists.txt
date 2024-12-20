@@ -34,6 +34,7 @@ set(
     src/entities/door.cpp
 
     src/utils/timer.cpp
+    src/utils/pathfinder.cpp
 )
 
 add_executable(main ${SOURCES})
