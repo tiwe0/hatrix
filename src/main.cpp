@@ -21,7 +21,7 @@ int main()
     world_ptr->add_entity(new Wall(), 2, 2);
     world_ptr->add_entity(new Wall(), -1, -2);
     world_ptr->add_entity(new Wall(), 0, -2);
-    //world_ptr->add_entity(new Wall(), 1, -2);
+    world_ptr->add_entity(new Wall(), 1, -2);
     world_ptr->add_entity(new Wall(), -1, 2);
     world_ptr->add_entity(new Wall(), 0, 2);
     world_ptr->add_entity(new Door(), 1, 2);

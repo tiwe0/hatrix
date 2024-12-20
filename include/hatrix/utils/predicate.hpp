@@ -22,6 +22,10 @@ inline bool is_door(Entity * entity){
     return is_<Door>(entity);
 };
 
+inline bool is_wall_or_door(Entity * entity){
+    return is_wall(entity) || is_door(entity);
+};
+
 inline bool is_character(Entity *entity){
     return is_<Character>(entity);
 };

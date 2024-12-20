@@ -92,6 +92,10 @@ void Gamemap::add_entity(Entity *entity)
     };
     GamemapCell *the_cell = get_cell(entity->position.x, entity->position.y);
     the_cell->add_entity(entity);
+
+    if(is_wall_or_door(entity)){
+        update_wall_glyph_in_range(entity->position.x, entity->position.y);
+    };
 };
 
 void Gamemap::remove_entity(Entity *entity) {
@@ -104,6 +108,10 @@ void Gamemap::remove_entity(Entity *entity) {
     };
     GamemapCell *the_cell = get_cell(entity->position.x, entity->position.y);
     the_cell->del_entity(entity);
+
+    if(is_wall_or_door(entity)){
+        update_wall_glyph_in_range(entity->position.x, entity->position.y);
+    };
 };
 
 void Gamemap::move_entity(Entity *entity, int dx, int dy) {
@@ -120,6 +128,10 @@ void Gamemap::move_entity(Entity *entity, int dx, int dy) {
 
     get_cell(old_position.x, old_position.y)->del_entity(entity);
     get_cell(new_position.x, new_position.y)->add_entity(entity);
+
+    if(is_wall_or_door(entity)){
+        update_wall_glyph_in_range(entity->position.x, entity->position.y);
+    };
 };
 
 bool Gamemap::open(int x, int y) {
