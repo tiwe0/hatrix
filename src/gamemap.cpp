@@ -213,7 +213,7 @@ bool Gamemap::is_opaque(int x, int y) {
 
 bool Gamemap::is_blocking(int x, int y){
     return get_cell(x, y)->blocking;
-}
+};
 
 void Gamemap::update_fov() {
     doupdate_fov();
@@ -227,6 +227,9 @@ void Gamemap::update_fov(Character *character){
             [character](int _x, int _y){character->fov.push_back(Vec2{_x, _y});},
             (float) character->vision
     );
+    for(Vec2& v: character->fov){
+        character->mark_as_visited(v.x, v.y);
+    };
 };
 
 void Gamemap::doupdate_fov(){

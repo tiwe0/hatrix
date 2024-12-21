@@ -30,6 +30,7 @@ class GamemapCell {
 
         bool blocking;
         bool opaque;
+        bool visited;
         Vec2 position;
         std::list<Entity *> entities;
 

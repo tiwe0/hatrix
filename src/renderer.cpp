@@ -1,4 +1,5 @@
 #include "hatrix/renderer.hpp"
+#include "hatrix/utils/color.hpp"
 #include "hatrix/utils/predicate.hpp"
 #include <bitset>
 #include <vector>
@@ -68,6 +69,8 @@ void Renderer::init()
         world->should_quit = true;
     }
     start_color();
+    hinit_pair();
+    hinit_color();
 
     keypad(stdscr, TRUE);                                      // keypad模式
     mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL); // 鼠标检测
@@ -92,6 +95,16 @@ void Renderer::init()
     windows[3] = newwin(28, 89, 2, 2);
     panels[3] = new_panel(windows[3]);
     hide_panel(panels[3]);
+};
+
+void Renderer::hinit_pair()
+{
+    init_pair(H_PAIR_MEMORY, H_COLOR_GRAY, COLOR_BLACK);
+};
+
+void Renderer::hinit_color()
+{
+    init_color(H_COLOR_GRAY, 500, 500, 500);
 };
 
 void Renderer::end()
@@ -154,7 +167,8 @@ void Renderer::handle_code_mode_input(int c)
     case 27:
         code_mode_off();
         code_editor->hide();
-        if(debug_mode){
+        if (debug_mode)
+        {
             debug_mode = false;
             world->core_eval(code_editor->get_content());
         };
@@ -164,7 +178,6 @@ void Renderer::handle_code_mode_input(int c)
         code_editor->handle_char(c);
     }
 };
-
 
 void Renderer::handle_play_mode_input(int c)
 {
@@ -284,73 +297,135 @@ void Renderer::dorender()
     doupdate();
 };
 
-void Renderer::render_ground()
+void Renderer::render_memory(Character *character)
 {
-    world->gamemap->update_fov();
-    for (Vec2 p : world->get_player()->fov)
+    wchar_t *wc;
+    cchar_t cc;
+    for (Vec2 m : character->visited)
     {
-        int rx = compute_render_x(p.x);
-        int ry = compute_render_y(p.y);
-        mvaddch(ry, rx, '.');
+        Entity *entity = world->gamemap->get_render_entity_at(m.x, m.y);
+        if (entity == nullptr)
+        {
+            continue;
+        }
+        else
+        {
+            cc = entity->glyph;
+            getcchar(&cc, wc, nullptr, nullptr, nullptr);
+            setcchar(&cc, wc, A_NORMAL, H_PAIR_MEMORY, nullptr);
+            int rx = compute_render_x(m.x);
+            int ry = compute_render_y(m.y);
+            mvadd_wch(ry, rx, &cc);
+        }
     };
 };
 
-void Renderer::render_world()
+void Renderer::render_fov(Character *character) {
+};
+
+void Renderer::render_player()
 {
+
+    world->gamemap->update_fov();
+
     Character *player = world->get_player();
+
     Vec2 player_position = player->position;
     target_x = player_position.x;
     target_y = player_position.y;
 
-    render_ground();
-
-    for (Vec2 p: world->get_player()->fov){
+    // render fov first
+    for (Vec2 p : player->fov)
+    {
         Entity *entity = world->gamemap->get_render_entity_at(p.x, p.y);
-        if(entity != nullptr){
+        if (entity != nullptr)
+        {
             render_entity(entity);
         };
     };
 
+    // render visited then
+    for (Vec2 v : player->visited)
+    {
+        bool in_fov = false;
+        for (Vec2 f : player->fov)
+        {
+            if (v == f)
+            {
+                in_fov = true;
+                break;
+            }
+        }
+        if (!in_fov)
+        {
+            Entity *entity = world->gamemap->get_render_entity_at(v.x, v.y);
+            if (entity != nullptr)
+            {
+
+                cchar_t cc;
+                setcchar(&cc, entity->glyph.chars, A_NORMAL, H_PAIR_MEMORY, nullptr);
+
+                int rx = compute_render_x(v.x);
+                int ry = compute_render_y(v.y);
+                mvadd_wch(ry, rx, &cc);
+            };
+        }
+    }
+}
+
+void Renderer::render_world()
+{
+
+    render_player();
+
 // DEBUG
 #ifdef HATRIX_DEBUG
-if(mouse_moved){
-    mouse_moved = false;
-    player->path = world->gamemap->get_path(player_position.x, player_position.y, mouse_world_x, mouse_world_y);
-};
-cchar_t c;
-setcchar(&c, L"*", A_NORMAL, 0, nullptr);
-std::vector<Vec2> &path = player->path;
-int i = 0;
-for (Vec2 &v : path)
-{
-    if(i == path.size()-1){
-        continue;
-    }
-    i++;
-    mvadd_wch(compute_render_y(v.y), compute_render_x(v.x), &c);
-};
+    Character *player = world->get_player();
+    Vec2 player_position = player->position;
+    if (mouse_moved)
+    {
+        mouse_moved = false;
+        player->path = world->gamemap->get_path(player_position.x, player_position.y, mouse_world_x, mouse_world_y);
+    };
+    cchar_t c;
+    setcchar(&c, L"*", A_NORMAL, 0, nullptr);
+    std::vector<Vec2> &path = player->path;
+    int i = 0;
+    for (Vec2 &v : path)
+    {
+        if (i == path.size() - 1)
+        {
+            continue;
+        }
+        i++;
+        mvadd_wch(compute_render_y(v.y), compute_render_x(v.x), &c);
+    };
 #endif
 };
 
-bool Renderer::in_viewver(int y, int x) {
+bool Renderer::in_viewver(int y, int x)
+{
     return (
-        (target_y - window_height / 2 < y) && 
-        (y < target_y + window_height / 2) && 
-        (target_x - window_width / 2 < x) && 
+        (target_y - window_height / 2 < y) &&
+        (y < target_y + window_height / 2) &&
+        (target_x - window_width / 2 < x) &&
         (x < target_x + window_width / 2));
 };
 
-int Renderer::compute_render_x(int x) {
+int Renderer::compute_render_x(int x)
+{
     int dx = x - target_x;
     return window_width / 2 + dx + offset_x;
 };
 
-int Renderer::compute_render_y(int y) {
+int Renderer::compute_render_y(int y)
+{
     int dy = y - target_y;
     return window_height / 2 + dy + offset_y;
 };
 
-void Renderer::update_mouse_world_position() {
+void Renderer::update_mouse_world_position()
+{
     int _offset_x = mouse_x - window_width / 2;
     int _offset_y = mouse_y - window_height / 2;
 
@@ -360,7 +435,7 @@ void Renderer::update_mouse_world_position() {
 
 void Renderer::render_entity(Entity *entity)
 {
-    cchar_t* glyph = &(entity->glyph);
+    cchar_t *glyph = &(entity->glyph);
     int x = entity->position.x;
     int y = entity->position.y;
     if (in_viewver(y, x))
@@ -399,6 +474,7 @@ void Renderer::render_debug_panel()
     mvwprintw(windows[3], ++i, 1, "window size: (%d, %d)", window_width, window_height);
     mvwprintw(windows[3], ++i, 1, "player action: [%s]", std::string(*controller->get_action()).c_str());
     mvwprintw(windows[3], ++i, 1, "player position: (%d, %d)", world->get_player()->position.x, world->get_player()->position.y);
+    mvwprintw(windows[3], ++i, 1, "player memory size: %d", world->get_player()->visited.size());
     mvwprintw(windows[3], ++i, 1, "mouse position: (%d, %d)", mouse_x, mouse_y);
     mvwprintw(windows[3], ++i, 1, "mouse last position: (%d, %d)", last_mouse_x, last_mouse_y);
     mvwprintw(windows[3], ++i, 1, "mouse world position: (%d, %d)", mouse_world_x, mouse_world_y);
@@ -412,10 +488,11 @@ void Renderer::render_debug_panel()
     //     int mask = wall->mask;
     //     mvwprintw(windows[3], ++i, 1, "wall mask: %s", std::bitset<4>(mask).to_string().c_str());
     // };
-    mvwprintw(windows[3], ++i, 1, "blocking: %s", world->gamemap->is_blocking(mouse_world_x, mouse_world_y)? "yes": "no");
-    mvwprintw(windows[3], ++i, 1, "opaque: %s", world->gamemap->is_opaque(mouse_world_x, mouse_world_y)? "yes": "no");
+    mvwprintw(windows[3], ++i, 1, "blocking: %s", world->gamemap->is_blocking(mouse_world_x, mouse_world_y) ? "yes" : "no");
+    mvwprintw(windows[3], ++i, 1, "opaque: %s", world->gamemap->is_opaque(mouse_world_x, mouse_world_y) ? "yes" : "no");
     std::stringstream os;
-    for(Vec2& v : world->get_player()->path){
+    for (Vec2 &v : world->get_player()->path)
+    {
         os << v.to_string() << "<-";
     }
     mvwprintw(windows[3], ++i, 1, "path: %s", os.str().c_str());
@@ -452,7 +529,8 @@ void Renderer::code_mode_off()
     code_mode = false;
 };
 
-void Renderer::update_mouse_position(){
+void Renderer::update_mouse_position()
+{
     mouse_moved = true;
 
     last_mouse_x = mouse_x;

@@ -15,6 +15,7 @@
 class World;
 class Controller;
 class Entity;
+class Character;
 class Editor;
 
 class Renderer
@@ -27,6 +28,8 @@ public:
 private:
 
     void init();
+    void hinit_pair();
+    void hinit_color();
     void end();
 
     bool shold_render();
@@ -42,11 +45,15 @@ private:
     void dorender();
 
     void render_world();
-    void render_ground();
     void render_entity(Entity *entity);
 
-    // for debug
+    // Character render
+    void render_memory(Character *character);
+    void render_fov(Character *character);
     void render_path(Entity *entity);
+
+    // Player
+    void render_player();
 
     void render_ui();
     void render_status_panel();

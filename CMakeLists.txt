@@ -30,6 +30,8 @@ set(
     src/core/the_core.cpp
 
     src/entities/entity.cpp
+    src/entities/character.cpp
+    src/entities/ground.cpp
     src/entities/wall.cpp
     src/entities/player.cpp
     src/entities/door.cpp

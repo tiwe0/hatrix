@@ -1,0 +1,7 @@
+#ifndef HATRIX_UTILS_COLOR
+#define HATRIX_UTILS_COLOR
+
+#define H_PAIR_MEMORY 1
+#define H_COLOR_GRAY 1
+
+#endif
