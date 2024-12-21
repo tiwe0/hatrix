@@ -18,6 +18,7 @@
 #include "hatrix/gamemap.hpp"
 #include "hatrix/utils/position.hpp"
 #include "hatrix/entities/character.hpp"
+#include "hatrix/entities/static_entity.hpp"
 #include "hatrix/ui/editor.hpp"
 
 // stdscr: 36 , 130 , 0, 0
@@ -358,17 +359,16 @@ void Renderer::render_player()
         }
         if (!in_fov)
         {
-            Entity *entity = world->gamemap->get_render_entity_at(v.x, v.y);
-            if (entity != nullptr)
-            {
+            StaticEntity *entity = world->gamemap->get_static_entity_at(v.x, v.y);
+            if (entity == nullptr){
+                continue;
+            }
+            cchar_t cc;
+            setcchar(&cc, entity->glyph.chars, A_NORMAL, H_PAIR_MEMORY, nullptr);
 
-                cchar_t cc;
-                setcchar(&cc, entity->glyph.chars, A_NORMAL, H_PAIR_MEMORY, nullptr);
-
-                int rx = compute_render_x(v.x);
-                int ry = compute_render_y(v.y);
-                mvadd_wch(ry, rx, &cc);
-            };
+            int rx = compute_render_x(v.x);
+            int ry = compute_render_y(v.y);
+            mvadd_wch(ry, rx, &cc);
         }
     }
 }
@@ -490,6 +490,7 @@ void Renderer::render_debug_panel()
     // };
     mvwprintw(windows[3], ++i, 1, "blocking: %s", world->gamemap->is_blocking(mouse_world_x, mouse_world_y) ? "yes" : "no");
     mvwprintw(windows[3], ++i, 1, "opaque: %s", world->gamemap->is_opaque(mouse_world_x, mouse_world_y) ? "yes" : "no");
+    mvwprintw(windows[3], ++i, 1, "has static entity: %s", world->gamemap->has_entity_at_which(mouse_world_x, mouse_world_y, is_static_entity) ? "yes" : "no");
     std::stringstream os;
     for (Vec2 &v : world->get_player()->path)
     {

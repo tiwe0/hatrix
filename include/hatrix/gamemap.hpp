@@ -12,6 +12,7 @@ class World;
 class Entity;
 class Character;
 class Gamemap;
+class StaticEntity;
 
 class PathFinder{
     public:
@@ -68,6 +69,8 @@ public:
     Entity *get_first_entity_at_which(int x, int y, const std::function<bool(Entity *)>& cond);
     // 查询某一位置 渲染 entity, 没有则返回 nullptr
     Entity *get_render_entity_at(int x, int y);
+    // 查询某一位置 静态 entity, 没有则返回 nullptr
+    StaticEntity *get_static_entity_at(int x, int y);
 
     // 查询某个位置是否有符合条件的entity
     bool has_entity_at_which(int x, int y,const std::function<bool(Entity *)>& cond);

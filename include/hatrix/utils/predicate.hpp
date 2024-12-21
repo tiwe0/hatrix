@@ -4,6 +4,7 @@
 #include <functional>
 #include <typeinfo>
 #include "hatrix/utils/predicate.hpp"
+#include "hatrix/entities/static_entity.hpp"
 #include "hatrix/entities/entity.hpp"
 #include "hatrix/entities/door.hpp"
 #include "hatrix/entities/wall.hpp"
@@ -28,5 +29,9 @@ inline bool is_wall_or_door(Entity * entity){
 
 inline bool is_character(Entity *entity){
     return is_<Character>(entity);
+};
+
+inline bool is_static_entity(Entity *entity){
+    return entity->type == EntityType::STATIC;
 };
 #endif

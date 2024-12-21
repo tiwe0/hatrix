@@ -196,6 +196,12 @@ Entity *Gamemap::get_first_entity_at_which(int x, int y, const std::function<boo
     return nullptr;
 };
 
+StaticEntity *Gamemap::get_static_entity_at(int x, int y)
+{
+    StaticEntity *entity = (StaticEntity *)get_first_entity_at_which(x, y, is_static_entity);
+    return entity;
+}
+
 Entity *Gamemap::get_render_entity_at(int x, int y) {
     Entity *entity = get_first_entity_at_which(x, y, is_character);
     if(entity == nullptr ){
@@ -228,7 +234,10 @@ void Gamemap::update_fov(Character *character){
             (float) character->vision
     );
     for(Vec2& v: character->fov){
-        character->mark_as_visited(v.x, v.y);
+        // 只记忆有静态实体的位置
+        if(has_entity_at_which(v.x, v.y, is_static_entity)){
+            character->mark_as_visited(v.x, v.y);
+        }
     };
 };
 
